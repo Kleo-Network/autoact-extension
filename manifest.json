@@ -1,0 +1,12 @@
+{
+    "manifest_version": 3,
+    "name": "AutoAct",
+    "version": "1.0.0",
+    "description": "",
+    "content_scripts": [
+        {
+            "js": ["src/content.tsx"],
+            "matches": ["<all_urls>"]
+        }
+    ]
+}
