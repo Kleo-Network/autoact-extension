@@ -37,7 +37,7 @@ const commonPlugins = [
 
 // React Application (Popup or Options Page)
 const reactApp = {
-  input: 'src/main.tsx', // Entry point for your React app
+  input: 'sidebar/main.tsx', // Entry point for your React app
   output: {
     sourcemap: !production,
     format: 'iife',
@@ -126,7 +126,7 @@ const background = {
 // Previous imports remain the same...
 
 const contentScript = {
-    input: 'content/index.ts',
+    input: 'toolbar/index.ts',
     output: {
       sourcemap: !production,
       format: 'iife',
@@ -137,7 +137,7 @@ const contentScript = {
       ...commonPlugins,
       typescript({
         tsconfig: './tsconfig.json',
-        include: ['content/**/*.ts', 'content/**/*.tsx'], // Add .tsx files
+        include: ['toolbar/**/*.ts', 'toolbar/**/*.tsx'], // Add .tsx files
       }),
       babel({
         babelHelpers: 'bundled',
