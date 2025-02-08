@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "AutoAct",
+  "version": "0.1.0",
+  "description": "AutoAct Chrome Extension",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "sidePanel"
+  ],
+  "side_panel": {
+    "default_path": "app.html",
+    "default_title": "AutoAct"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "contentScript.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}
