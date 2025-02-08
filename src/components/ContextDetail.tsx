@@ -7,7 +7,7 @@ interface ContextDetailProps {
     context: ContextItem;
     isEditMode: boolean;
     onEdit: () => void;
-    onSave: (title: string, description: string) => void;
+    onSave: () => void;
     onCancel: () => void;
 }
 
