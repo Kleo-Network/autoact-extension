@@ -5,6 +5,10 @@ import Modal from '../components/Modal';
 const ContentPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
 
+    const openSidebar = (contentType: 'contexts' | 'addNewContext') => {
+        chrome.runtime.sendMessage({ action: 'openSidePanel', contentType });
+    };
+
     return (
         <div>
             <Modal
@@ -21,7 +25,10 @@ const ContentPage: React.FC = () => {
                         size={30}
                     />
                 </button>
-                <button className="p-1 mt-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800">
+                <button
+                    className="p-1 mt-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800"
+                    onClick={() => openSidebar('contexts')}
+                >
                     <BiData
                         color="white"
                         size={30}
@@ -31,6 +38,7 @@ const ContentPage: React.FC = () => {
                     <BiPlus
                         color="white"
                         size={30}
+                        onClick={() => openSidebar('addNewContext')}
                     />
                 </button>
             </div>
