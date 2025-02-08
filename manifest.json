@@ -2,10 +2,10 @@
     "manifest_version": 3,
     "name": "AutoAct",
     "version": "1.0.0",
-    "description": "",
+    "description": "AutoAct Chrome Extension",
     "content_scripts": [
         {
-            "js": ["src/content.tsx"],
+            "js": ["contentScript.js"],
             "matches": ["<all_urls>"]
         }
     ]
