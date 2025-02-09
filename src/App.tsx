@@ -3,37 +3,12 @@ import { BiArrowBack } from 'react-icons/bi';
 import AddContextForm from './components/AddContextForm';
 import ContextDetail from './components/ContextDetail';
 import ContextList from './components/ContextList';
-import { ContextItem } from './models/context.model';
+import useContexts from './hooks/useContexts';
+import { ContextFormValues, ContextItem } from './models/context.model';
 
 const App: React.FC = () => {
-    const contextItems: ContextItem[] = [
-        {
-            id: 1,
-            title: 'My Projects',
-            description:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris aliquam elit magna, vitae laoreet enim maximus et. Suspendisse eget justo.',
-        },
-        {
-            id: 2,
-            title: 'Flight Info',
-            description:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris aliquam elit magna, vitae laoreet enim maximus et. Suspendisse eget justo.',
-        },
-        {
-            id: 3,
-            title: 'Bank Statements',
-            description:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris aliquam elit magna, vitae laoreet enim maximus et. Suspendisse eget justo.',
-        },
-        {
-            id: 4,
-            title: 'My Orders',
-            description:
-                'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris aliquam elit magna, vitae laoreet enim maximus et. Suspendisse eget justo.',
-        },
-    ];
-
-    const [currentContext, setCurrentContext] =
+    const { contexts: contextItems } = useContexts(),
+        [currentContext, setCurrentContext] =
             React.useState<ContextItem | null>(null),
         [isEditMode, setIsEditMode] = React.useState(false),
         [sidebarContentType, setSidebarContentType] = React.useState<
@@ -62,18 +37,21 @@ const App: React.FC = () => {
 
     const handleCancel = () => setIsEditMode(false);
 
-    const handleSave = () => {
+    const handleSave = (updateContext: ContextFormValues) => {
+        setCurrentContext((prevContext) => {
+            if (!prevContext) return null;
+            return {
+                ...prevContext,
+                ...updateContext,
+            };
+        });
         setIsEditMode(false);
     };
 
-    if (sidebarContentType === 'addNewContext') {
-        return <AddContextForm />;
-    }
-
-    return (
+    return sidebarContentType === 'contexts' ? (
         <div className="text-base">
             {currentContext && (
-                <div className="">
+                <div>
                     <div className="w-full p-4 border-b border-gray-200">
                         <button
                             className="rounded-full p-1 transition-colors duration-100 ease-linear hover:bg-slate-200"
@@ -102,6 +80,13 @@ const App: React.FC = () => {
                 />
             )}
         </div>
+    ) : (
+        <AddContextForm
+            onSaved={() => {
+                setSidebarContentType('contexts');
+                setCurrentContext(null);
+            }}
+        />
     );
 };
 

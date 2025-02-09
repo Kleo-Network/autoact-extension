@@ -5,6 +5,30 @@ import Modal from '../components/Modal';
 const ContentPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = React.useState(false);
 
+    const sendPageData = () => {
+        chrome.runtime.sendMessage({
+            action: 'scrappedPageData',
+            pageData: {
+                title: document.title,
+                description: document.body.innerText,
+            },
+        });
+    };
+
+    React.useEffect(() => {
+        sendPageData();
+
+        document.addEventListener('visibilitychange', () => {
+            sendPageData();
+        });
+
+        return () => {
+            document.removeEventListener('visibilitychange', () => {
+                sendPageData();
+            });
+        };
+    }, []);
+
     const openSidebar = (contentType: 'contexts' | 'addNewContext') => {
         chrome.runtime.sendMessage({ action: 'openSidePanel', contentType });
     };

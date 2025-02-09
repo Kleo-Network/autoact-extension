@@ -1,13 +1,30 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import useContexts from '../hooks/useContexts';
 import { ContextFormValues } from '../models/context.model';
 import EditContextForm from './EditContextForm';
 
-const AddContextForm: React.FC = () => {
+interface AddContextFormProps {
+    onSaved: () => void;
+}
+
+const AddContextForm: React.FC<AddContextFormProps> = ({ onSaved }) => {
     const [contextFormData, setContextFormData] =
-        React.useState<ContextFormValues>({
-            title: '',
-            description: '',
-        });
+            React.useState<ContextFormValues>({
+                title: '',
+                description: '',
+            }),
+        { addNewContext } = useContexts();
+
+    useEffect(() => {
+        chrome.runtime.sendMessage(
+            { action: 'getPageData' },
+            (response: { pageData: ContextFormValues } | undefined) => {
+                if (response) {
+                    setContextFormData(response.pageData);
+                }
+            },
+        );
+    }, []);
 
     const handleChange = (name: keyof ContextFormValues, value: string) => {
         setContextFormData({
@@ -16,8 +33,16 @@ const AddContextForm: React.FC = () => {
         });
     };
 
-    const handleSave = () => {
-        // Make an API call to add new context in DB
+    const handleSave = async () => {
+        if (
+            contextFormData.title.trim() === '' ||
+            contextFormData.description.trim() === ''
+        ) {
+            return;
+        }
+
+        await addNewContext(contextFormData);
+        onSaved();
     };
 
     const handleCancel = () => {

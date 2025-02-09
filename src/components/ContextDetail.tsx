@@ -1,5 +1,6 @@
 import React from 'react';
 import { BiSolidPencil } from 'react-icons/bi';
+import useContexts from '../hooks/useContexts';
 import { ContextFormValues, ContextItem } from '../models/context.model';
 import EditContextForm from './EditContextForm';
 
@@ -7,7 +8,7 @@ interface ContextDetailProps {
     context: ContextItem;
     isEditMode: boolean;
     onEdit: () => void;
-    onSave: () => void;
+    onSave: (updateContext: ContextFormValues) => void;
     onCancel: () => void;
 }
 
@@ -19,9 +20,10 @@ const ContextDetail: React.FC<ContextDetailProps> = ({
     onCancel,
 }) => {
     const [contextData, setContextData] = React.useState<ContextFormValues>({
-        title: context.title,
-        description: context.description,
-    });
+            title: context.title,
+            description: context.description,
+        }),
+        { updateContext } = useContexts();
 
     const handleContextDataChange = (
         name: keyof ContextFormValues,
@@ -33,9 +35,19 @@ const ContextDetail: React.FC<ContextDetailProps> = ({
         });
     };
 
-    const handleSave = () => {
-        // Make an API call to update context in DB
-        onSave();
+    const handleSave = async () => {
+        if (
+            contextData.title.trim() === '' ||
+            contextData.description.trim() === ''
+        ) {
+            return;
+        }
+
+        await updateContext({
+            id: context.id,
+            ...contextData,
+        });
+        onSave(contextData);
     };
 
     const handleCancel = () => {
