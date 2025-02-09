@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { BiSolidPencil } from 'react-icons/bi';
-import useContexts from '../hooks/useContexts';
+import { ContextsContext } from '../contexts/ContextsContext';
 import { ContextFormValues, ContextItem } from '../models/context.model';
 import EditContextForm from './EditContextForm';
 
@@ -23,7 +23,7 @@ const ContextDetail: React.FC<ContextDetailProps> = ({
             title: context.title,
             description: context.description,
         }),
-        { updateContext } = useContexts();
+        { updateContext } = useContext(ContextsContext);
 
     const handleContextDataChange = (
         name: keyof ContextFormValues,

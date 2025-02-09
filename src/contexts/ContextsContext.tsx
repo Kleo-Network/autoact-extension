@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import {
     addNewContextToDB,
     getAllContextsFromDB,
@@ -6,7 +6,29 @@ import {
 } from '../db/utils';
 import { ContextFormValues, ContextItem } from '../models/context.model';
 
-export default function useContexts() {
+interface ContextsContextType {
+    contexts: ContextItem[];
+    isLoading: boolean;
+    isSaving: boolean;
+    error: string | null;
+    saveError: string | null;
+    addNewContext: (context: ContextFormValues) => Promise<void>;
+    updateContext: (updateContext: ContextItem) => Promise<void>;
+}
+
+const ContextsContext = createContext<ContextsContextType>({
+    contexts: [],
+    isLoading: false,
+    isSaving: false,
+    error: null,
+    saveError: null,
+    addNewContext: async () => {},
+    updateContext: async () => {},
+});
+
+const ContextsProvider: React.FC<{ children: React.ReactNode }> = ({
+    children,
+}) => {
     const [contexts, setContexts] = useState<ContextItem[]>([]),
         [isLoading, setIsLoading] = useState(false),
         [isSaving, setIsSaving] = useState(false),
@@ -42,7 +64,7 @@ export default function useContexts() {
 
         try {
             await addNewContextToDB(newContext);
-            setContexts((prevContexts) => [...prevContexts, newContext]);
+            await fetchContexts();
             setIsSaving(false);
         } catch (error) {
             setIsSaving(false);
@@ -57,11 +79,7 @@ export default function useContexts() {
 
         try {
             await updateContextInDB(updateContext);
-            setContexts((prevContexts) =>
-                prevContexts.map((context) =>
-                    context.id === updateContext.id ? updateContext : context,
-                ),
-            );
+            await fetchContexts();
             setIsSaving(false);
         } catch (error) {
             setIsSaving(false);
@@ -70,13 +88,21 @@ export default function useContexts() {
         }
     };
 
-    return {
-        contexts,
-        isLoading,
-        isSaving,
-        error,
-        saveError,
-        addNewContext,
-        updateContext,
-    };
-}
+    return (
+        <ContextsContext.Provider
+            value={{
+                contexts,
+                isLoading,
+                isSaving,
+                error,
+                saveError,
+                addNewContext,
+                updateContext,
+            }}
+        >
+            {children}
+        </ContextsContext.Provider>
+    );
+};
+
+export { ContextsContext, ContextsProvider };

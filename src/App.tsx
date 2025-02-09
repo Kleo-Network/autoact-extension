@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { BiArrowBack } from 'react-icons/bi';
 import AddContextForm from './components/AddContextForm';
 import ContextDetail from './components/ContextDetail';
 import ContextList from './components/ContextList';
-import useContexts from './hooks/useContexts';
+import { ContextsContext } from './contexts/ContextsContext';
 import { ContextFormValues, ContextItem } from './models/context.model';
 
 const App: React.FC = () => {
-    const { contexts: contextItems } = useContexts(),
+    const { contexts: contextItems } = useContext(ContextsContext),
         [currentContext, setCurrentContext] =
             React.useState<ContextItem | null>(null),
         [isEditMode, setIsEditMode] = React.useState(false),

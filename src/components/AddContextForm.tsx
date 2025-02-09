@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import useContexts from '../hooks/useContexts';
+import React, { useContext, useEffect } from 'react';
+import { ContextsContext } from '../contexts/ContextsContext';
 import { ContextFormValues } from '../models/context.model';
 import EditContextForm from './EditContextForm';
 
@@ -13,7 +13,7 @@ const AddContextForm: React.FC<AddContextFormProps> = ({ onSaved }) => {
                 title: '',
                 description: '',
             }),
-        { addNewContext } = useContexts();
+        { addNewContext } = useContext(ContextsContext);
 
     useEffect(() => {
         chrome.runtime.sendMessage(
