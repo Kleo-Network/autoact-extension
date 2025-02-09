@@ -9,15 +9,10 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     const [selectedOption, setSelectedOption] = useState('Fill Form'),
-        [selectedContext, setSelectedContext] = useState('Context 1'),
         [prompt, setPrompt] = useState('');
 
     const handleSelectionChange = (option: string) => {
         setSelectedOption(option);
-    };
-
-    const handleContextChange = (context: string) => {
-        setSelectedContext(context);
     };
 
     if (!isOpen) return null;
@@ -44,19 +39,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                         />
                     </button>
                 </div>
-                <Pills
-                    options={[
-                        'Context 1',
-                        'Context 2',
-                        'Context 3',
-                        'Context 4',
-                    ]}
-                    selectedOption={selectedContext}
-                    onSelectionChange={handleContextChange}
-                />
                 <input
                     type="text"
-                    className="w-full border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-2 focus:border-blue-600"
+                    className="w-full bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-2 focus:border-blue-600"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                 />

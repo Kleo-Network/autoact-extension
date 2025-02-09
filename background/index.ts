@@ -1,24 +1,28 @@
-console.log("hello from the background/index.ts script");
+let contentType = 'contexts',
+    scrappedPageData = {
+        title: '',
+        description: '',
+    };
 
-chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch((error) => console.error(error));
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'openSidePanel') {
+        contentType = message.contentType;
+        chrome.sidePanel.setOptions({ enabled: true });
+        chrome.sidePanel.open({
+            windowId: sender?.tab?.windowId || 0,
+            tabId: sender?.tab?.id,
+        });
+    }
 
-chrome.runtime.onMessage.addListener((
-    message: { action: string },
-    sender: chrome.runtime.MessageSender,
-    sendResponse: (response?: any) => void
-) => {
-    console.log("message received", message);
-    if (message.action === "openSidePanel" && sender.tab) {
-        
-            console.log("tab", sender.tab);
-            console.log("window", sender.tab?.windowId);
-            
-                        chrome.sidePanel.open({
-                            windowId: sender.tab?.windowId,
-                            tabId: sender.tab?.id
-                        });
-                    
-            
-        
+    if (message.action === 'getSidebarContentType') {
+        sendResponse({ contentType });
+    }
+
+    if (message.action === 'scrappedPageData') {
+        scrappedPageData = message.pageData;
+    }
+
+    if (message.action === 'getPageData') {
+        sendResponse({ pageData: scrappedPageData });
     }
 });

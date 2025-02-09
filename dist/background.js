@@ -1,18 +1,31 @@
-console.log("hello from the background/index.ts script");
-chrome.sidePanel.setPanelBehavior({
-  openPanelOnActionClick: true
-})["catch"](function (error) {
-  return console.error(error);
-});
+var contentType = 'contexts',
+  scrappedPageData = {
+    title: '',
+    description: ''
+  };
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-  console.log("message received", message);
-  if (message.action === "openSidePanel" && sender.tab) {
-    var _sender$tab, _sender$tab2, _sender$tab3;
-    console.log("tab", sender.tab);
-    console.log("window", (_sender$tab = sender.tab) === null || _sender$tab === void 0 ? void 0 : _sender$tab.windowId);
+  if (message.action === 'openSidePanel') {
+    var _sender$tab, _sender$tab2;
+    contentType = message.contentType;
+    chrome.sidePanel.setOptions({
+      enabled: true
+    });
     chrome.sidePanel.open({
-      windowId: (_sender$tab2 = sender.tab) === null || _sender$tab2 === void 0 ? void 0 : _sender$tab2.windowId,
-      tabId: (_sender$tab3 = sender.tab) === null || _sender$tab3 === void 0 ? void 0 : _sender$tab3.id
+      windowId: (sender === null || sender === void 0 || (_sender$tab = sender.tab) === null || _sender$tab === void 0 ? void 0 : _sender$tab.windowId) || 0,
+      tabId: sender === null || sender === void 0 || (_sender$tab2 = sender.tab) === null || _sender$tab2 === void 0 ? void 0 : _sender$tab2.id
+    });
+  }
+  if (message.action === 'getSidebarContentType') {
+    sendResponse({
+      contentType: contentType
+    });
+  }
+  if (message.action === 'scrappedPageData') {
+    scrappedPageData = message.pageData;
+  }
+  if (message.action === 'getPageData') {
+    sendResponse({
+      pageData: scrappedPageData
     });
   }
 });

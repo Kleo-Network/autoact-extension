@@ -27119,6 +27119,55 @@
 
 	var clientExports = requireClient();
 
+	function _arrayLikeToArray(r, a) {
+	  (null == a || a > r.length) && (a = r.length);
+	  for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e];
+	  return n;
+	}
+	function _arrayWithHoles(r) {
+	  if (Array.isArray(r)) return r;
+	}
+	function _iterableToArrayLimit(r, l) {
+	  var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"];
+	  if (null != t) {
+	    var e,
+	      n,
+	      i,
+	      u,
+	      a = [],
+	      f = !0,
+	      o = !1;
+	    try {
+	      if (i = (t = t.call(r)).next, 0 === l) {
+	        if (Object(t) !== t) return;
+	        f = !1;
+	      } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0);
+	    } catch (r) {
+	      o = !0, n = r;
+	    } finally {
+	      try {
+	        if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return;
+	      } finally {
+	        if (o) throw n;
+	      }
+	    }
+	    return a;
+	  }
+	}
+	function _nonIterableRest() {
+	  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+	}
+	function _slicedToArray(r, e) {
+	  return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest();
+	}
+	function _unsupportedIterableToArray(r, a) {
+	  if (r) {
+	    if ("string" == typeof r) return _arrayLikeToArray(r, a);
+	    var t = {}.toString.call(r).slice(8, -1);
+	    return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0;
+	  }
+	}
+
 	var DefaultContext = {
 	  color: undefined,
 	  size: undefined,
@@ -27183,24 +27232,124 @@
 	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"},"child":[]}]})(props);
 	}function BiSolidMagicWand (props) {
 	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"m11 4-.5-1-.5 1-1 .125.834.708L9.5 6l1-.666 1 .666-.334-1.167.834-.708zm8.334 10.666L18.5 13l-.834 1.666-1.666.209 1.389 1.181L16.834 18l1.666-1.111L20.166 18l-.555-1.944L21 14.875zM6.667 6.333 6 5l-.667 1.333L4 6.5l1.111.944L4.667 9 6 8.111 7.333 9l-.444-1.556L8 6.5zM3.414 17c0 .534.208 1.036.586 1.414L5.586 20c.378.378.88.586 1.414.586s1.036-.208 1.414-.586L20 8.414c.378-.378.586-.88.586-1.414S20.378 5.964 20 5.586L18.414 4c-.756-.756-2.072-.756-2.828 0L4 15.586c-.378.378-.586.88-.586 1.414zM17 5.414 18.586 7 15 10.586 13.414 9 17 5.414z"},"child":[]}]})(props);
+	}function BiSolidXCircle (props) {
+	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm4.207 12.793-1.414 1.414L12 13.414l-2.793 2.793-1.414-1.414L10.586 12 7.793 9.207l1.414-1.414L12 10.586l2.793-2.793 1.414 1.414L13.414 12l2.793 2.793z"},"child":[]}]})(props);
 	}
 
-	var SideToolbar = function SideToolbar() {
-	  var handleOpenSidePanel = function handleOpenSidePanel() {
+	var Pills = function Pills(_ref) {
+	  var options = _ref.options,
+	    selectedOption = _ref.selectedOption,
+	    onSelectionChange = _ref.onSelectionChange;
+	  return /*#__PURE__*/React.createElement("div", {
+	    className: "flex space-x-3"
+	  }, options.map(function (option) {
+	    return /*#__PURE__*/React.createElement("button", {
+	      key: option,
+	      className: "px-3 py-2 rounded-full border transition-all duration-200 ease-linear ".concat(selectedOption === option ? 'bg-blue-600 text-white border-blue-600 hover:cursor-default' : 'bg-white text-blue-600 border-blue-600 hover:bg-slate-200 hover:cursor-pointer'),
+	      onClick: function onClick() {
+	        return onSelectionChange(option);
+	      }
+	    }, option);
+	  }));
+	};
+
+	var Modal = function Modal(_ref) {
+	  var isOpen = _ref.isOpen,
+	    onClose = _ref.onClose;
+	  var _useState = reactExports.useState('Fill Form'),
+	    _useState2 = _slicedToArray(_useState, 2),
+	    selectedOption = _useState2[0],
+	    setSelectedOption = _useState2[1],
+	    _useState3 = reactExports.useState(''),
+	    _useState4 = _slicedToArray(_useState3, 2),
+	    prompt = _useState4[0],
+	    setPrompt = _useState4[1];
+	  var handleSelectionChange = function handleSelectionChange(option) {
+	    setSelectedOption(option);
+	  };
+	  if (!isOpen) return null;
+	  return /*#__PURE__*/React.createElement("div", {
+	    className: "modal fixed inset-0 w-full h-full bg-black bg-opacity-50 z-[1000] flex justify-center items-center",
+	    onClick: onClose
+	  }, /*#__PURE__*/React.createElement("div", {
+	    className: "bg-white rounded-lg w-full max-w-screen-sm flex flex-col gap-y-4 p-4",
+	    onClick: function onClick(e) {
+	      return e.stopPropagation();
+	    }
+	  }, /*#__PURE__*/React.createElement("div", {
+	    className: "w-full flex items-center justify-between"
+	  }, /*#__PURE__*/React.createElement(Pills, {
+	    options: ['Fill Form', 'Chat'],
+	    selectedOption: selectedOption,
+	    onSelectionChange: handleSelectionChange
+	  }), /*#__PURE__*/React.createElement("button", {
+	    onClick: onClose
+	  }, /*#__PURE__*/React.createElement(BiSolidXCircle, {
+	    color: "gray",
+	    size: 30
+	  }))), /*#__PURE__*/React.createElement("input", {
+	    type: "text",
+	    className: "w-full bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-2 focus:border-blue-600",
+	    value: prompt,
+	    onChange: function onChange(e) {
+	      return setPrompt(e.target.value);
+	    }
+	  }), /*#__PURE__*/React.createElement("button", {
+	    className: "w-fit self-end bg-blue-600 text-white rounded-lg font-medium transition-colors duration-100 ease-linear px-4 py-2 hover:bg-blue-700"
+	  }, "Run")));
+	};
+
+	var ContentPage = function ContentPage() {
+	  var _React$useState = React.useState(false),
+	    _React$useState2 = _slicedToArray(_React$useState, 2),
+	    isModalOpen = _React$useState2[0],
+	    setIsModalOpen = _React$useState2[1];
+	  var sendPageData = function sendPageData() {
 	    chrome.runtime.sendMessage({
-	      action: "openSidePanel"
+	      action: 'scrappedPageData',
+	      pageData: {
+	        title: document.title,
+	        description: document.body.innerText
+	      }
 	    });
 	  };
-	  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+	  React.useEffect(function () {
+	    sendPageData();
+	    document.addEventListener('visibilitychange', function () {
+	      sendPageData();
+	    });
+	    return function () {
+	      document.removeEventListener('visibilitychange', function () {
+	        sendPageData();
+	      });
+	    };
+	  }, []);
+	  var openSidebar = function openSidebar(contentType) {
+	    chrome.runtime.sendMessage({
+	      action: 'openSidePanel',
+	      contentType: contentType
+	    });
+	  };
+	  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(Modal, {
+	    isOpen: isModalOpen,
+	    onClose: function onClose() {
+	      return setIsModalOpen(false);
+	    }
+	  }), /*#__PURE__*/React.createElement("div", {
 	    className: "buttons-wrapper fixed top-1/2 right-0 flex flex-col bg-blue-600 w-fit p-1 rounded-tl-lg rounded-bl-lg z-50"
 	  }, /*#__PURE__*/React.createElement("button", {
-	    className: "p-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800"
+	    className: "p-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800",
+	    onClick: function onClick() {
+	      return setIsModalOpen(true);
+	    }
 	  }, /*#__PURE__*/React.createElement(BiSolidMagicWand, {
 	    color: "white",
 	    size: 30
 	  })), /*#__PURE__*/React.createElement("button", {
 	    className: "p-1 mt-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800",
-	    onClick: handleOpenSidePanel
+	    onClick: function onClick() {
+	      return openSidebar('contexts');
+	    }
 	  }, /*#__PURE__*/React.createElement(BiData, {
 	    color: "white",
 	    size: 30
@@ -27208,58 +27357,47 @@
 	    className: "p-1 mt-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800"
 	  }, /*#__PURE__*/React.createElement(BiPlus, {
 	    color: "white",
-	    size: 30
+	    size: 30,
+	    onClick: function onClick() {
+	      return openSidebar('addNewContext');
+	    }
 	  }))));
 	};
 
-	// content/index.ts
-	var mountReactApp = function mountReactApp() {
-	  // Check if the container already exists
-	  var existingContainer = document.getElementById('my-extension-root');
-	  if (existingContainer) return;
+	function styleInject(css, ref) {
+	  if ( ref === void 0 ) ref = {};
+	  var insertAt = ref.insertAt;
 
-	  // Create container for React app
-	  var container = document.createElement('div');
-	  container.id = 'my-extension-root';
+	  if (!css || typeof document === 'undefined') { return; }
 
-	  // Add any necessary styles to position your component
-	  container.style.position = 'fixed';
-	  container.style.right = '0';
-	  container.style.top = '50%';
-	  container.style.transform = 'translateY(-50%)';
-	  container.style.zIndex = '9999';
+	  var head = document.head || document.getElementsByTagName('head')[0];
+	  var style = document.createElement('style');
+	  style.type = 'text/css';
 
-	  // Append to body
-	  document.body.appendChild(container);
-
-	  // Create root and render
-	  var root = clientExports.createRoot(container);
-	  root.render(/*#__PURE__*/React.createElement(SideToolbar));
-	};
-
-	// Handle potential errors
-	var init = function init() {
-	  try {
-	    mountReactApp();
-	  } catch (error) {
-	    console.error('Failed to mount React app:', error);
+	  if (insertAt === 'top') {
+	    if (head.firstChild) {
+	      head.insertBefore(style, head.firstChild);
+	    } else {
+	      head.appendChild(style);
+	    }
+	  } else {
+	    head.appendChild(style);
 	  }
-	};
 
-	// Execute when DOM is ready
-	if (document.readyState === 'loading') {
-	  document.addEventListener('DOMContentLoaded', init);
-	} else {
-	  init();
+	  if (style.styleSheet) {
+	    style.styleSheet.cssText = css;
+	  } else {
+	    style.appendChild(document.createTextNode(css));
+	  }
 	}
 
-	// Optional: Clean up on unload
-	window.addEventListener('unload', function () {
-	  var container = document.getElementById('my-extension-root');
-	  if (container) {
-	    document.body.removeChild(container);
-	  }
-	});
+	var css_248z = "*, ::before, ::after {\n  --tw-border-spacing-x: 0;\n  --tw-border-spacing-y: 0;\n  --tw-translate-x: 0;\n  --tw-translate-y: 0;\n  --tw-rotate: 0;\n  --tw-skew-x: 0;\n  --tw-skew-y: 0;\n  --tw-scale-x: 1;\n  --tw-scale-y: 1;\n  --tw-pan-x:  ;\n  --tw-pan-y:  ;\n  --tw-pinch-zoom:  ;\n  --tw-scroll-snap-strictness: proximity;\n  --tw-gradient-from-position:  ;\n  --tw-gradient-via-position:  ;\n  --tw-gradient-to-position:  ;\n  --tw-ordinal:  ;\n  --tw-slashed-zero:  ;\n  --tw-numeric-figure:  ;\n  --tw-numeric-spacing:  ;\n  --tw-numeric-fraction:  ;\n  --tw-ring-inset:  ;\n  --tw-ring-offset-width: 0px;\n  --tw-ring-offset-color: #fff;\n  --tw-ring-color: rgb(59 130 246 / 0.5);\n  --tw-ring-offset-shadow: 0 0 #0000;\n  --tw-ring-shadow: 0 0 #0000;\n  --tw-shadow: 0 0 #0000;\n  --tw-shadow-colored: 0 0 #0000;\n  --tw-blur:  ;\n  --tw-brightness:  ;\n  --tw-contrast:  ;\n  --tw-grayscale:  ;\n  --tw-hue-rotate:  ;\n  --tw-invert:  ;\n  --tw-saturate:  ;\n  --tw-sepia:  ;\n  --tw-drop-shadow:  ;\n  --tw-backdrop-blur:  ;\n  --tw-backdrop-brightness:  ;\n  --tw-backdrop-contrast:  ;\n  --tw-backdrop-grayscale:  ;\n  --tw-backdrop-hue-rotate:  ;\n  --tw-backdrop-invert:  ;\n  --tw-backdrop-opacity:  ;\n  --tw-backdrop-saturate:  ;\n  --tw-backdrop-sepia:  ;\n  --tw-contain-size:  ;\n  --tw-contain-layout:  ;\n  --tw-contain-paint:  ;\n  --tw-contain-style:  ;\n}\n\n::backdrop {\n  --tw-border-spacing-x: 0;\n  --tw-border-spacing-y: 0;\n  --tw-translate-x: 0;\n  --tw-translate-y: 0;\n  --tw-rotate: 0;\n  --tw-skew-x: 0;\n  --tw-skew-y: 0;\n  --tw-scale-x: 1;\n  --tw-scale-y: 1;\n  --tw-pan-x:  ;\n  --tw-pan-y:  ;\n  --tw-pinch-zoom:  ;\n  --tw-scroll-snap-strictness: proximity;\n  --tw-gradient-from-position:  ;\n  --tw-gradient-via-position:  ;\n  --tw-gradient-to-position:  ;\n  --tw-ordinal:  ;\n  --tw-slashed-zero:  ;\n  --tw-numeric-figure:  ;\n  --tw-numeric-spacing:  ;\n  --tw-numeric-fraction:  ;\n  --tw-ring-inset:  ;\n  --tw-ring-offset-width: 0px;\n  --tw-ring-offset-color: #fff;\n  --tw-ring-color: rgb(59 130 246 / 0.5);\n  --tw-ring-offset-shadow: 0 0 #0000;\n  --tw-ring-shadow: 0 0 #0000;\n  --tw-shadow: 0 0 #0000;\n  --tw-shadow-colored: 0 0 #0000;\n  --tw-blur:  ;\n  --tw-brightness:  ;\n  --tw-contrast:  ;\n  --tw-grayscale:  ;\n  --tw-hue-rotate:  ;\n  --tw-invert:  ;\n  --tw-saturate:  ;\n  --tw-sepia:  ;\n  --tw-drop-shadow:  ;\n  --tw-backdrop-blur:  ;\n  --tw-backdrop-brightness:  ;\n  --tw-backdrop-contrast:  ;\n  --tw-backdrop-grayscale:  ;\n  --tw-backdrop-hue-rotate:  ;\n  --tw-backdrop-invert:  ;\n  --tw-backdrop-opacity:  ;\n  --tw-backdrop-saturate:  ;\n  --tw-backdrop-sepia:  ;\n  --tw-contain-size:  ;\n  --tw-contain-layout:  ;\n  --tw-contain-paint:  ;\n  --tw-contain-style:  ;\n}/*\n! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com\n*//*\n1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)\n2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)\n*/\n\n*,\n::before,\n::after {\n  box-sizing: border-box; /* 1 */\n  border-width: 0; /* 2 */\n  border-style: solid; /* 2 */\n  border-color: #e5e7eb; /* 2 */\n}\n\n::before,\n::after {\n  --tw-content: '';\n}\n\n/*\n1. Use a consistent sensible line-height in all browsers.\n2. Prevent adjustments of font size after orientation changes in iOS.\n3. Use a more readable tab size.\n4. Use the user's configured `sans` font-family by default.\n5. Use the user's configured `sans` font-feature-settings by default.\n6. Use the user's configured `sans` font-variation-settings by default.\n7. Disable tap highlights on iOS\n*/\n\nhtml,\n:host {\n  line-height: 1.5; /* 1 */\n  -webkit-text-size-adjust: 100%; /* 2 */\n  -moz-tab-size: 4; /* 3 */\n  -o-tab-size: 4;\n     tab-size: 4; /* 3 */\n  font-family: ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"; /* 4 */\n  font-feature-settings: normal; /* 5 */\n  font-variation-settings: normal; /* 6 */\n  -webkit-tap-highlight-color: transparent; /* 7 */\n}\n\n/*\n1. Remove the margin in all browsers.\n2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.\n*/\n\nbody {\n  margin: 0; /* 1 */\n  line-height: inherit; /* 2 */\n}\n\n/*\n1. Add the correct height in Firefox.\n2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)\n3. Ensure horizontal rules are visible by default.\n*/\n\nhr {\n  height: 0; /* 1 */\n  color: inherit; /* 2 */\n  border-top-width: 1px; /* 3 */\n}\n\n/*\nAdd the correct text decoration in Chrome, Edge, and Safari.\n*/\n\nabbr:where([title]) {\n  -webkit-text-decoration: underline dotted;\n          text-decoration: underline dotted;\n}\n\n/*\nRemove the default font size and weight for headings.\n*/\n\nh1,\nh2,\nh3,\nh4,\nh5,\nh6 {\n  font-size: inherit;\n  font-weight: inherit;\n}\n\n/*\nReset links to optimize for opt-in styling instead of opt-out.\n*/\n\na {\n  color: inherit;\n  text-decoration: inherit;\n}\n\n/*\nAdd the correct font weight in Edge and Safari.\n*/\n\nb,\nstrong {\n  font-weight: bolder;\n}\n\n/*\n1. Use the user's configured `mono` font-family by default.\n2. Use the user's configured `mono` font-feature-settings by default.\n3. Use the user's configured `mono` font-variation-settings by default.\n4. Correct the odd `em` font sizing in all browsers.\n*/\n\ncode,\nkbd,\nsamp,\npre {\n  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace; /* 1 */\n  font-feature-settings: normal; /* 2 */\n  font-variation-settings: normal; /* 3 */\n  font-size: 1em; /* 4 */\n}\n\n/*\nAdd the correct font size in all browsers.\n*/\n\nsmall {\n  font-size: 80%;\n}\n\n/*\nPrevent `sub` and `sup` elements from affecting the line height in all browsers.\n*/\n\nsub,\nsup {\n  font-size: 75%;\n  line-height: 0;\n  position: relative;\n  vertical-align: baseline;\n}\n\nsub {\n  bottom: -0.25em;\n}\n\nsup {\n  top: -0.5em;\n}\n\n/*\n1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)\n2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)\n3. Remove gaps between table borders by default.\n*/\n\ntable {\n  text-indent: 0; /* 1 */\n  border-color: inherit; /* 2 */\n  border-collapse: collapse; /* 3 */\n}\n\n/*\n1. Change the font styles in all browsers.\n2. Remove the margin in Firefox and Safari.\n3. Remove default padding in all browsers.\n*/\n\nbutton,\ninput,\noptgroup,\nselect,\ntextarea {\n  font-family: inherit; /* 1 */\n  font-feature-settings: inherit; /* 1 */\n  font-variation-settings: inherit; /* 1 */\n  font-size: 100%; /* 1 */\n  font-weight: inherit; /* 1 */\n  line-height: inherit; /* 1 */\n  letter-spacing: inherit; /* 1 */\n  color: inherit; /* 1 */\n  margin: 0; /* 2 */\n  padding: 0; /* 3 */\n}\n\n/*\nRemove the inheritance of text transform in Edge and Firefox.\n*/\n\nbutton,\nselect {\n  text-transform: none;\n}\n\n/*\n1. Correct the inability to style clickable types in iOS and Safari.\n2. Remove default button styles.\n*/\n\nbutton,\ninput:where([type='button']),\ninput:where([type='reset']),\ninput:where([type='submit']) {\n  -webkit-appearance: button; /* 1 */\n  background-color: transparent; /* 2 */\n  background-image: none; /* 2 */\n}\n\n/*\nUse the modern Firefox focus style for all focusable elements.\n*/\n\n:-moz-focusring {\n  outline: auto;\n}\n\n/*\nRemove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)\n*/\n\n:-moz-ui-invalid {\n  box-shadow: none;\n}\n\n/*\nAdd the correct vertical alignment in Chrome and Firefox.\n*/\n\nprogress {\n  vertical-align: baseline;\n}\n\n/*\nCorrect the cursor style of increment and decrement buttons in Safari.\n*/\n\n::-webkit-inner-spin-button,\n::-webkit-outer-spin-button {\n  height: auto;\n}\n\n/*\n1. Correct the odd appearance in Chrome and Safari.\n2. Correct the outline style in Safari.\n*/\n\n[type='search'] {\n  -webkit-appearance: textfield; /* 1 */\n  outline-offset: -2px; /* 2 */\n}\n\n/*\nRemove the inner padding in Chrome and Safari on macOS.\n*/\n\n::-webkit-search-decoration {\n  -webkit-appearance: none;\n}\n\n/*\n1. Correct the inability to style clickable types in iOS and Safari.\n2. Change font properties to `inherit` in Safari.\n*/\n\n::-webkit-file-upload-button {\n  -webkit-appearance: button; /* 1 */\n  font: inherit; /* 2 */\n}\n\n/*\nAdd the correct display in Chrome and Safari.\n*/\n\nsummary {\n  display: list-item;\n}\n\n/*\nRemoves the default spacing and border for appropriate elements.\n*/\n\nblockquote,\ndl,\ndd,\nh1,\nh2,\nh3,\nh4,\nh5,\nh6,\nhr,\nfigure,\np,\npre {\n  margin: 0;\n}\n\nfieldset {\n  margin: 0;\n  padding: 0;\n}\n\nlegend {\n  padding: 0;\n}\n\nol,\nul,\nmenu {\n  list-style: none;\n  margin: 0;\n  padding: 0;\n}\n\n/*\nReset default styling for dialogs.\n*/\ndialog {\n  padding: 0;\n}\n\n/*\nPrevent resizing textareas horizontally by default.\n*/\n\ntextarea {\n  resize: vertical;\n}\n\n/*\n1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)\n2. Set the default placeholder color to the user's configured gray 400 color.\n*/\n\ninput::-moz-placeholder, textarea::-moz-placeholder {\n  opacity: 1; /* 1 */\n  color: #9ca3af; /* 2 */\n}\n\ninput::placeholder,\ntextarea::placeholder {\n  opacity: 1; /* 1 */\n  color: #9ca3af; /* 2 */\n}\n\n/*\nSet the default cursor for buttons.\n*/\n\nbutton,\n[role=\"button\"] {\n  cursor: pointer;\n}\n\n/*\nMake sure disabled buttons don't get the pointer cursor.\n*/\n:disabled {\n  cursor: default;\n}\n\n/*\n1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)\n2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)\n   This can trigger a poorly considered lint error in some tools but is included by design.\n*/\n\nimg,\nsvg,\nvideo,\ncanvas,\naudio,\niframe,\nembed,\nobject {\n  display: block; /* 1 */\n  vertical-align: middle; /* 2 */\n}\n\n/*\nConstrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)\n*/\n\nimg,\nvideo {\n  max-width: 100%;\n  height: auto;\n}\n\n/* Make elements with the HTML hidden attribute stay hidden by default */\n[hidden]:where(:not([hidden=\"until-found\"])) {\n  display: none;\n}\n";
+	styleInject(css_248z);
+
+	var root = document.createElement('div');
+	root.id = '__autoact_container';
+	document.body.append(root);
+	clientExports.createRoot(root).render(/*#__PURE__*/reactExports.createElement(ContentPage));
 
 })();
 //# sourceMappingURL=contentScript.js.map
