@@ -43,6 +43,7 @@ const reactApp = {
     format: 'iife',
     name: 'app',
     file: 'dist/js/app.js',
+    strict: true
   },
   plugins: [
     ...commonPlugins,
@@ -61,7 +62,7 @@ const reactApp = {
     }),
     production &&
       visualizer({
-        filename: 'app.html',
+        filename: 'public/app.html',
         template: 'treemap', // or 'sunburst' for different visualization
       }),
       postcss({
@@ -115,7 +116,7 @@ const background = {
     }),
     production &&
       visualizer({
-        filename: 'background.html',
+        filename: 'public/background.html',
         template: 'treemap',
       }),
   ],
@@ -154,7 +155,7 @@ const contentScript = {
       }),
       production &&
         visualizer({
-          filename: 'contentScript.html',
+          filename: 'public/contentScript.html',
           template: 'treemap',
         }),
     ],

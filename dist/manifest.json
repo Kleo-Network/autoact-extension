@@ -11,7 +11,7 @@
     "tabs"
   ],
   "side_panel": {
-    "default_path": "app.html",
+    "default_path": "index.html",
     "default_title": "AutoAct"
   },
   "content_scripts": [
