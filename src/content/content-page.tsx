@@ -39,7 +39,7 @@ const ContentPage: React.FC = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
             />
-            <div className="buttons-wrapper fixed top-1/2 right-0 flex flex-col bg-blue-600 w-fit p-1 rounded-tl-lg rounded-bl-lg z-50">
+            <div className="buttons-wrapper fixed top-[42%] right-0 flex flex-col bg-blue-600 w-fit p-1 rounded-tl-lg rounded-bl-lg z-50">
                 <button
                     className="p-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800"
                     onClick={() => setIsModalOpen(true)}

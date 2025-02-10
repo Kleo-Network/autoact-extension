@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BiSolidXCircle } from 'react-icons/bi';
+import { ContextItem } from '../models/context.model';
 import Pills from './Pills';
 
 interface ModalProps {
@@ -9,17 +10,39 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     const [selectedOption, setSelectedOption] = useState('Fill Form'),
-        [prompt, setPrompt] = useState('');
+        [prompt, setPrompt] = useState(''),
+        [contexts, setContexts] = useState<ContextItem[]>([]),
+        [selectedContext, setSelectedContext] = useState('');
 
     const handleSelectionChange = (option: string) => {
         setSelectedOption(option);
     };
 
+    const handleContextSelectionChange = (context: string) => {
+        setSelectedContext(context);
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            chrome.runtime.sendMessage(
+                { action: 'getContexts' },
+                (response: { data: ContextItem[]; error: string | null }) => {
+                    if (response && !response.error) {
+                        setContexts(response.data);
+                        setSelectedContext(
+                            response.data.length ? response.data[0].title : '',
+                        );
+                    }
+                },
+            );
+        }
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     return (
         <div
-            className="modal fixed inset-0 w-full h-full bg-black bg-opacity-50 z-[1000] flex justify-center items-center"
+            className="modal fixed inset-0 w-full h-full bg-black backdrop-blur-sm bg-opacity-50 z-[1000] flex justify-center items-center"
             onClick={onClose}
         >
             <div
@@ -32,13 +55,21 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                         selectedOption={selectedOption}
                         onSelectionChange={handleSelectionChange}
                     />
-                    <button onClick={onClose}>
+                    <button
+                        className="hover:text-blue-600"
+                        onClick={onClose}
+                    >
                         <BiSolidXCircle
                             color="gray"
                             size={30}
                         />
                     </button>
                 </div>
+                <Pills
+                    options={contexts.map((context) => context.title)}
+                    selectedOption={selectedContext}
+                    onSelectionChange={handleContextSelectionChange}
+                />
                 <input
                     type="text"
                     className="w-full bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-2 focus:border-blue-600"
