@@ -1,3 +1,5 @@
+import { getAllContextsFromDB } from '../sidebar/db/utils';
+
 let contentType = 'contexts',
     scrappedPageData = {
         title: '',
@@ -24,5 +26,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.action === 'getPageData') {
         sendResponse({ pageData: scrappedPageData });
+    }
+
+    if (message.action === 'getContexts') {
+        (async () => {
+            try {
+                const contexts = await getAllContextsFromDB();
+                sendResponse({ data: contexts, error: null });
+            } catch (error) {
+                console.error('Error getting contexts from DB', error);
+                sendResponse({
+                    data: [],
+                    error: 'Error getting contexts from DB',
+                });
+            }
+        })();
+        return true;
     }
 });

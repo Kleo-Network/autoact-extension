@@ -64,7 +64,7 @@ const ContextsProvider: React.FC<{ children: React.ReactNode }> = ({
 
         try {
             await addNewContextToDB(newContext);
-            await fetchContexts();
+            setContexts((prevContexts) => [...prevContexts, newContext]);
             setIsSaving(false);
         } catch (error) {
             setIsSaving(false);
@@ -79,7 +79,11 @@ const ContextsProvider: React.FC<{ children: React.ReactNode }> = ({
 
         try {
             await updateContextInDB(updateContext);
-            await fetchContexts();
+            setContexts((prevContexts) =>
+                prevContexts.map((context) =>
+                    context.id === updateContext.id ? updateContext : context,
+                ),
+            );
             setIsSaving(false);
         } catch (error) {
             setIsSaving(false);

@@ -1,6 +1,13 @@
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import App from './App';
+import { ContextsProvider } from './contexts/ContextsContext';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
-        <h1>Hello World</h1>
+    <StrictMode>
+        <ContextsProvider>
+            <App />
+        </ContextsProvider>
+    </StrictMode>,
 );
