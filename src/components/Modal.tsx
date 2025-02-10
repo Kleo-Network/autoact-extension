@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BiSolidXCircle } from 'react-icons/bi';
+import { ContextItem } from '../models/context.model';
 import Pills from './Pills';
 
 interface ModalProps {
@@ -9,11 +10,33 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     const [selectedOption, setSelectedOption] = useState('Fill Form'),
-        [prompt, setPrompt] = useState('');
+        [prompt, setPrompt] = useState(''),
+        [contexts, setContexts] = useState<ContextItem[]>([]),
+        [selectedContext, setSelectedContext] = useState('');
 
     const handleSelectionChange = (option: string) => {
         setSelectedOption(option);
     };
+
+    const handleContextSelectionChange = (context: string) => {
+        setSelectedContext(context);
+    };
+
+    useEffect(() => {
+        if (isOpen) {
+            chrome.runtime.sendMessage(
+                { action: 'getContexts' },
+                (response: { data: ContextItem[]; error: string | null }) => {
+                    if (response && !response.error) {
+                        setContexts(response.data);
+                        setSelectedContext(
+                            response.data.length ? response.data[0].title : '',
+                        );
+                    }
+                },
+            );
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -39,6 +62,11 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                         />
                     </button>
                 </div>
+                <Pills
+                    options={contexts.map((context) => context.title)}
+                    selectedOption={selectedContext}
+                    onSelectionChange={handleContextSelectionChange}
+                />
                 <input
                     type="text"
                     className="w-full bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-2 focus:border-blue-600"
