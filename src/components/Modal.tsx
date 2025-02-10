@@ -42,7 +42,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
     return (
         <div
-            className="modal fixed inset-0 w-full h-full bg-black bg-opacity-50 z-[1000] flex justify-center items-center"
+            className="modal fixed inset-0 w-full h-full bg-black backdrop-blur-sm bg-opacity-50 z-[1000] flex justify-center items-center"
             onClick={onClose}
         >
             <div
@@ -55,7 +55,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                         selectedOption={selectedOption}
                         onSelectionChange={handleSelectionChange}
                     />
-                    <button onClick={onClose}>
+                    <button
+                        className="hover:text-blue-600"
+                        onClick={onClose}
+                    >
                         <BiSolidXCircle
                             color="gray"
                             size={30}
