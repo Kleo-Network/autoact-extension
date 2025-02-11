@@ -36,7 +36,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                 },
             );
         }
-    }, [isOpen]);
+    }, []);
 
     if (!isOpen) return null;
 

@@ -15,7 +15,7 @@ const EditContextForm: React.FC<EditContextFormProps> = ({
     onCancel,
 }) => {
     return (
-        <div className="w-full flex flex-col gap-y-2">
+        <div className="w-full flex flex-col gap-y-3">
             <input
                 type="text"
                 value={context.title}

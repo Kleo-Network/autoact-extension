@@ -27937,6 +27937,8 @@
 	// THIS FILE IS AUTO GENERATED
 	function BiArrowBack (props) {
 	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M21 11H6.414l5.293-5.293-1.414-1.414L2.586 12l7.707 7.707 1.414-1.414L6.414 13H21z"},"child":[]}]})(props);
+	}function BiPlus (props) {
+	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"},"child":[]}]})(props);
 	}function BiSolidPencil (props) {
 	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M8.707 19.707 18 10.414 13.586 6l-9.293 9.293a1.003 1.003 0 0 0-.263.464L3 21l5.242-1.03c.176-.044.337-.135.465-.263zM21 7.414a2 2 0 0 0 0-2.828L19.414 3a2 2 0 0 0-2.828 0L15 4.586 19.414 9 21 7.414z"},"child":[]}]})(props);
 	}
@@ -28212,7 +28214,7 @@
 	    onSave = _a.onSave,
 	    onCancel = _a.onCancel;
 	  return jsxRuntimeExports.jsxs("div", {
-	    className: "w-full flex flex-col gap-y-2",
+	    className: "w-full flex flex-col gap-y-3",
 	    children: [jsxRuntimeExports.jsx("input", {
 	      type: "text",
 	      value: context.title,
@@ -28284,8 +28286,8 @@
 	    });
 	  };
 	  var handleCancel = function handleCancel() {
-	    chrome.sidePanel.setOptions({
-	      enabled: false
+	    chrome.runtime.sendMessage({
+	      action: 'closeSidePanel'
 	    });
 	    setContextFormData({
 	      title: '',
@@ -28376,12 +28378,15 @@
 	  var item = _a.item,
 	    onView = _a.onView;
 	  return jsxRuntimeExports.jsxs("div", {
-	    className: "border border-gray-200 rounded-lg flex justify-between items-center p-4",
+	    className: "bg-[#fafafa] rounded-lg p-4 flex flex-col gap-y-2",
 	    children: [jsxRuntimeExports.jsx("h1", {
-	      className: "text-base font-medium",
+	      className: "text-base font-semibold",
 	      children: item.title
+	    }), jsxRuntimeExports.jsx("p", {
+	      className: "text-sm text-gray-500 line-clamp-2",
+	      children: item.description
 	    }), jsxRuntimeExports.jsx("button", {
-	      className: "text-blue-600 text-sm hover:underline hover:underline-offset-4",
+	      className: "text-blue-600 text-sm w-fit mt-2 hover:underline hover:underline-offset-4",
 	      onClick: function onClick() {
 	        return onView(item);
 	      },
@@ -28396,7 +28401,7 @@
 	  return jsxRuntimeExports.jsxs("div", {
 	    className: "p-4 flex flex-col space-y-4",
 	    children: [jsxRuntimeExports.jsx("h1", {
-	      className: "mb-2 text-xl font-bold",
+	      className: "mb-2 text-2xl font-bold",
 	      children: "Your Knowledgebase"
 	    }), contextItems.map(function (item) {
 	      return jsxRuntimeExports.jsx(ContextItemComponent, {
@@ -28420,12 +28425,21 @@
 	    setSidebarContentType = _c[1];
 	  reactExports.useEffect(function () {
 	    chrome.runtime.sendMessage({
-	      action: 'getSidebarContentType'
+	      action: 'getSidebarState'
 	    }, function (response) {
 	      if (response) {
 	        setSidebarContentType(response.contentType);
 	      }
 	    });
+	    var handleMessage = function handleMessage(message) {
+	      if (message.action === 'updateSidebarContentType' && message.contentType) {
+	        setSidebarContentType(message.contentType);
+	      }
+	    };
+	    chrome.runtime.onMessage.addListener(handleMessage);
+	    return function () {
+	      chrome.runtime.onMessage.removeListener(handleMessage);
+	    };
 	  }, []);
 	  var handleViewContext = function handleViewContext(item) {
 	    setCurrentContext(item);
@@ -28441,20 +28455,36 @@
 	    });
 	    setIsEditMode(false);
 	  };
+	  var addNewContext = function addNewContext() {
+	    chrome.runtime.sendMessage({
+	      action: 'scrappedPageData',
+	      pageData: {
+	        title: '',
+	        description: ''
+	      }
+	    });
+	    chrome.runtime.sendMessage({
+	      action: 'openSidePanel',
+	      contentType: 'addNewContext'
+	    });
+	    setSidebarContentType('addNewContext');
+	  };
 	  return sidebarContentType === 'contexts' ? jsxRuntimeExports.jsxs("div", {
 	    className: "text-base",
 	    children: [currentContext && jsxRuntimeExports.jsxs("div", {
 	      children: [jsxRuntimeExports.jsx("div", {
 	        className: "w-full p-4 border-b border-gray-200",
-	        children: jsxRuntimeExports.jsx("button", {
-	          className: "rounded-full p-1 transition-colors duration-100 ease-linear hover:bg-slate-200",
+	        children: jsxRuntimeExports.jsxs("button", {
+	          className: "rounded-lg py-2 px-3 transition-colors duration-100 ease-linear flex items-center gap-x-2 bg-slate-200 hover:text-blue-600",
 	          onClick: function onClick() {
 	            setCurrentContext(null);
 	            setIsEditMode(false);
 	          },
-	          children: jsxRuntimeExports.jsx(BiArrowBack, {
+	          children: [jsxRuntimeExports.jsx(BiArrowBack, {
 	            size: 18
-	          })
+	          }), jsxRuntimeExports.jsx("span", {
+	            children: "Back to Knowledgebase"
+	          })]
 	        })
 	      }), jsxRuntimeExports.jsx(ContextDetail, {
 	        context: currentContext,
@@ -28468,9 +28498,22 @@
 	    }), !currentContext && jsxRuntimeExports.jsx(ContextList, {
 	      contextItems: contextItems,
 	      onView: handleViewContext
+	    }), !isEditMode && jsxRuntimeExports.jsxs("button", {
+	      className: "fixed right-4 bottom-4 z-50 text-lg bg-blue-600 text-white rounded-lg hover:bg-blue-700 py-2 px-4 flex items-center justify-center gap-x-1 font-medium",
+	      onClick: addNewContext,
+	      children: [jsxRuntimeExports.jsx(BiPlus, {
+	        size: 18,
+	        color: "white"
+	      }), jsxRuntimeExports.jsx("span", {
+	        children: "New"
+	      })]
 	    })]
 	  }) : jsxRuntimeExports.jsx(AddContextForm, {
 	    onSaved: function onSaved() {
+	      chrome.runtime.sendMessage({
+	        action: 'openSidePanel',
+	        contentType: 'contexts'
+	      });
 	      setSidebarContentType('contexts');
 	      setCurrentContext(null);
 	    }

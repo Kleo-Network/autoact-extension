@@ -63,8 +63,15 @@ const ContentPage: React.FC = () => {
         });
     }, []);
 
-    const openSidebar = (contentType: 'contexts' | 'addNewContext') => {
-        chrome.runtime.sendMessage({ action: 'openSidePanel', contentType });
+    const openSidebar = (
+        contentType: 'contexts' | 'addNewContext',
+        notifySidePanel = false,
+    ) => {
+        chrome.runtime.sendMessage({
+            action: 'openSidePanel',
+            contentType,
+            notifySidePanel,
+        });
     };
 
     const removeSelection = () => {
@@ -73,14 +80,12 @@ const ContentPage: React.FC = () => {
     };
 
     const sendPageData = () => {
-        console.log('sending pageData...');
-
         removeSelection();
         chrome.runtime.sendMessage({
             action: 'scrappedPageData',
             pageData,
         });
-        openSidebar('addNewContext');
+        openSidebar('addNewContext', true);
     };
 
     return (
@@ -103,17 +108,23 @@ const ContentPage: React.FC = () => {
                         size={14}
                         color="white"
                     />
-                    <span>Add to Knowledgebase</span>
+                    <span>Add to AutoAct</span>
                 </button>
             )}
-            <div className="buttons-wrapper fixed top-[42%] right-0 flex flex-col bg-blue-600 w-fit p-1 rounded-tl-lg rounded-bl-lg z-50">
+            <div
+                className="buttons-wrapper fixed top-[42%] right-0 flex flex-col bg-blue-600 w-fit p-1 rounded-tl-lg rounded-bl-lg z-50"
+                title="Magic"
+            >
                 <button className="p-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800">
                     <BiSolidMagicWand
                         color="white"
                         size={30}
                     />
                 </button>
-                <button className="p-1 mt-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800">
+                <button
+                    className="p-1 mt-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800"
+                    title="Run"
+                >
                     <BiPlay
                         color="white"
                         size={30}
@@ -126,9 +137,36 @@ const ContentPage: React.FC = () => {
                 <button
                     className="p-1 mt-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800"
                     onClick={() => {
-                        openSidebar('contexts');
+                        chrome.runtime.sendMessage(
+                            { action: 'getSidebarState' },
+                            (
+                                response:
+                                    | {
+                                          contentType:
+                                              | 'contexts'
+                                              | 'addNewContext';
+                                          isSidePanelOpen: boolean;
+                                      }
+                                    | undefined,
+                            ) => {
+                                if (response && response.isSidePanelOpen) {
+                                    if (
+                                        response.contentType === 'addNewContext'
+                                    )
+                                        openSidebar('contexts', true);
+                                    else {
+                                        chrome.runtime.sendMessage({
+                                            action: 'closeSidePanel',
+                                        });
+                                    }
+                                } else {
+                                    openSidebar('contexts', true);
+                                }
+                            },
+                        );
                         removeSelection();
                     }}
+                    title="Knowledgebase"
                 >
                     <BiData
                         color="white"

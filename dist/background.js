@@ -396,11 +396,19 @@ var contentType = 'contexts',
   scrappedPageData = {
     title: '',
     description: ''
-  };
+  },
+  isSidePanelOpen = false;
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === 'openSidePanel') {
     var _sender$tab, _sender$tab2;
     contentType = message.contentType;
+    isSidePanelOpen = true;
+    if (message.notifySidePanel) {
+      chrome.runtime.sendMessage({
+        action: 'updateSidebarContentType',
+        contentType: contentType
+      });
+    }
     chrome.sidePanel.setOptions({
       enabled: true
     });
@@ -409,9 +417,16 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       tabId: sender === null || sender === void 0 || (_sender$tab2 = sender.tab) === null || _sender$tab2 === void 0 ? void 0 : _sender$tab2.id
     });
   }
-  if (message.action === 'getSidebarContentType') {
+  if (message.action === 'closeSidePanel') {
+    isSidePanelOpen = false;
+    chrome.sidePanel.setOptions({
+      enabled: false
+    });
+  }
+  if (message.action === 'getSidebarState') {
     sendResponse({
-      contentType: contentType
+      contentType: contentType,
+      isSidePanelOpen: isSidePanelOpen
     });
   }
   if (message.action === 'scrappedPageData') {
@@ -454,6 +469,11 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       }, _callee, null, [[0, 7]]);
     }))();
     return true;
+  }
+  if (message.action === 'informModalToRefetchContexts') {
+    chrome.runtime.sendMessage({
+      action: 'refetchContexts'
+    });
   }
 });
 //# sourceMappingURL=background.js.map
