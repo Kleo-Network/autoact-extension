@@ -28393,14 +28393,17 @@
 	var ContextList = function ContextList(_a) {
 	  var contextItems = _a.contextItems,
 	    onView = _a.onView;
-	  return jsxRuntimeExports.jsx("div", {
+	  return jsxRuntimeExports.jsxs("div", {
 	    className: "p-4 flex flex-col space-y-4",
-	    children: contextItems.map(function (item) {
+	    children: [jsxRuntimeExports.jsx("h1", {
+	      className: "mb-2 text-xl font-bold",
+	      children: "Your Knowledgebase"
+	    }), contextItems.map(function (item) {
 	      return jsxRuntimeExports.jsx(ContextItemComponent, {
 	        item: item,
 	        onView: onView
 	      }, item.id);
-	    })
+	    })]
 	  });
 	};
 
