@@ -27373,7 +27373,10 @@
 	        setShowAddButton(true);
 	      }
 	    });
-	    document.addEventListener('mousedown', function () {
+	    document.addEventListener('mousedown', function (event) {
+	      var _element$parentElemen;
+	      var element = event.target;
+	      if (element.id === 'btnAddToKnowledgebase' || ((_element$parentElemen = element.parentElement) === null || _element$parentElemen === void 0 ? void 0 : _element$parentElemen.id) === 'btnAddToKnowledgebase') return;
 	      setShowAddButton(false);
 	    });
 	    document.addEventListener('click', function () {
@@ -27396,6 +27399,7 @@
 	    setShowAddButton(false);
 	  };
 	  var sendPageData = function sendPageData() {
+	    console.log('sending pageData...');
 	    removeSelection();
 	    chrome.runtime.sendMessage({
 	      action: 'scrappedPageData',

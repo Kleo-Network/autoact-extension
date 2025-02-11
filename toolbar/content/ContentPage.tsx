@@ -43,7 +43,15 @@ const ContentPage: React.FC = () => {
             }
         });
 
-        document.addEventListener('mousedown', () => {
+        document.addEventListener('mousedown', (event: MouseEvent) => {
+            const element = event.target as HTMLElement;
+
+            if (
+                element.id === 'btnAddToKnowledgebase' ||
+                element.parentElement?.id === 'btnAddToKnowledgebase'
+            )
+                return;
+
             setShowAddButton(false);
         });
 
@@ -65,6 +73,8 @@ const ContentPage: React.FC = () => {
     };
 
     const sendPageData = () => {
+        console.log('sending pageData...');
+
         removeSelection();
         chrome.runtime.sendMessage({
             action: 'scrappedPageData',
