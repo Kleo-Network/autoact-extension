@@ -28214,7 +28214,7 @@
 	    onSave = _a.onSave,
 	    onCancel = _a.onCancel;
 	  return jsxRuntimeExports.jsxs("div", {
-	    className: "w-full flex flex-col gap-y-3",
+	    className: "w-full flex flex-col gap-y-4",
 	    children: [jsxRuntimeExports.jsx("input", {
 	      type: "text",
 	      value: context.title,
@@ -28295,9 +28295,9 @@
 	    });
 	  };
 	  return jsxRuntimeExports.jsxs("div", {
-	    className: "p-4 text-base flex flex-col gap-y-4",
+	    className: "px-6 py-4 text-base flex flex-col gap-y-4",
 	    children: [jsxRuntimeExports.jsx("h1", {
-	      className: "text-2xl font-semibold",
+	      className: "text-2xl font-semibold mb-2",
 	      children: "Add New Context"
 	    }), jsxRuntimeExports.jsx(EditContextForm, {
 	      context: contextFormData,
@@ -28311,7 +28311,6 @@
 	var ContextDetail = function ContextDetail(_a) {
 	  var context = _a.context,
 	    isEditMode = _a.isEditMode,
-	    onEdit = _a.onEdit,
 	    onSave = _a.onSave,
 	    onCancel = _a.onCancel;
 	  var _b = React.useState({
@@ -28348,21 +28347,17 @@
 	    onCancel();
 	  };
 	  return jsxRuntimeExports.jsx("div", {
-	    className: "p-4 w-full",
+	    className: "px-6 py-4 w-full",
 	    children: !isEditMode ? jsxRuntimeExports.jsxs("div", {
 	      className: "w-full",
-	      children: [jsxRuntimeExports.jsxs("div", {
+	      children: [jsxRuntimeExports.jsx("div", {
 	        className: "flex justify-between items-center",
-	        children: [jsxRuntimeExports.jsx("h1", {
+	        children: jsxRuntimeExports.jsx("h1", {
 	          className: "text-2xl font-semibold",
 	          children: context.title
-	        }), jsxRuntimeExports.jsx(BiSolidPencil, {
-	          size: 18,
-	          className: "cursor-pointer hover:text-blue-600",
-	          onClick: onEdit
-	        })]
+	        })
 	      }), jsxRuntimeExports.jsx("p", {
-	        className: "text-gray-600 text-base mt-2",
+	        className: "text-gray-600 text-sm mt-4",
 	        children: context.description
 	      })]
 	    }) : jsxRuntimeExports.jsx(EditContextForm, {
@@ -28378,7 +28373,10 @@
 	  var item = _a.item,
 	    onView = _a.onView;
 	  return jsxRuntimeExports.jsxs("div", {
-	    className: "bg-[#fafafa] rounded-lg p-4 flex flex-col gap-y-2",
+	    className: "bg-white rounded-lg p-4 flex flex-col gap-y-2 transition-all delay-75 duration-100 ease-linear hover:cursor-pointer hover:scale-105 hover:shadow-sm",
+	    onClick: function onClick() {
+	      return onView(item);
+	    },
 	    children: [jsxRuntimeExports.jsx("h1", {
 	      className: "text-base font-semibold",
 	      children: item.title
@@ -28386,11 +28384,8 @@
 	      className: "text-sm text-gray-500 line-clamp-2",
 	      children: item.description
 	    }), jsxRuntimeExports.jsx("button", {
-	      className: "text-blue-600 text-sm w-fit mt-2 hover:underline hover:underline-offset-4",
-	      onClick: function onClick() {
-	        return onView(item);
-	      },
-	      children: "VIEW"
+	      className: "text-blue-600 font-medium text-sm w-fit mt-2 hover:underline hover:underline-offset-4",
+	      children: "View More"
 	    })]
 	  });
 	};
@@ -28398,17 +28393,14 @@
 	var ContextList = function ContextList(_a) {
 	  var contextItems = _a.contextItems,
 	    onView = _a.onView;
-	  return jsxRuntimeExports.jsxs("div", {
-	    className: "p-4 flex flex-col space-y-4",
-	    children: [jsxRuntimeExports.jsx("h1", {
-	      className: "mb-2 text-2xl font-bold",
-	      children: "Your Knowledgebase"
-	    }), contextItems.map(function (item) {
+	  return jsxRuntimeExports.jsx("div", {
+	    className: "px-6 py-4 flex flex-col space-y-4 bg-[#fafafa] flex-1",
+	    children: contextItems.map(function (item) {
 	      return jsxRuntimeExports.jsx(ContextItemComponent, {
 	        item: item,
 	        onView: onView
 	      }, item.id);
-	    })]
+	    })
 	  });
 	};
 
@@ -28470,43 +28462,50 @@
 	    setSidebarContentType('addNewContext');
 	  };
 	  return sidebarContentType === 'contexts' ? jsxRuntimeExports.jsxs("div", {
-	    className: "text-base",
-	    children: [currentContext && jsxRuntimeExports.jsxs("div", {
-	      children: [jsxRuntimeExports.jsx("div", {
-	        className: "w-full p-4 border-b border-gray-200",
-	        children: jsxRuntimeExports.jsxs("button", {
-	          className: "rounded-lg py-2 px-3 transition-colors duration-100 ease-linear flex items-center gap-x-2 bg-slate-200 hover:text-blue-600",
-	          onClick: function onClick() {
-	            setCurrentContext(null);
-	            setIsEditMode(false);
-	          },
-	          children: [jsxRuntimeExports.jsx(BiArrowBack, {
-	            size: 18
-	          }), jsxRuntimeExports.jsx("span", {
-	            children: "Back to Knowledgebase"
-	          })]
-	        })
-	      }), jsxRuntimeExports.jsx(ContextDetail, {
-	        context: currentContext,
-	        isEditMode: isEditMode,
-	        onEdit: function onEdit() {
+	    className: "text-base flex flex-col min-h-screen",
+	    children: [jsxRuntimeExports.jsxs("div", {
+	      className: "w-full px-6 py-[14px] bg-[#EDF0F9] flex items-center justify-between",
+	      children: [!currentContext && jsxRuntimeExports.jsx("h1", {
+	        className: "text-lg font-semibold",
+	        children: "Your Knowledgebase"
+	      }), !currentContext && !isEditMode && jsxRuntimeExports.jsxs("button", {
+	        className: "text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 py-2 px-4 flex items-center justify-center gap-x-1 font-bold",
+	        onClick: addNewContext,
+	        children: [jsxRuntimeExports.jsx(BiPlus, {
+	          size: 18,
+	          color: "white"
+	        }), jsxRuntimeExports.jsx("span", {
+	          children: "New"
+	        })]
+	      }), currentContext && jsxRuntimeExports.jsxs("button", {
+	        className: "transition-colors duration-100 ease-linear flex items-center gap-x-2 hover:text-blue-600",
+	        onClick: function onClick() {
+	          setCurrentContext(null);
+	          setIsEditMode(false);
+	        },
+	        children: [jsxRuntimeExports.jsx(BiArrowBack, {
+	          size: 18
+	        }), jsxRuntimeExports.jsx("span", {
+	          children: "Back to Knowledgebase"
+	        })]
+	      }), currentContext && !isEditMode && jsxRuntimeExports.jsx("button", {
+	        className: "cursor-pointer transition-colors delay-75 duration-100 ease-linear hover:bg-slate-200 rounded-full p-1",
+	        onClick: function onClick() {
 	          return setIsEditMode(true);
 	        },
-	        onSave: handleSave,
-	        onCancel: handleCancel
+	        children: jsxRuntimeExports.jsx(BiSolidPencil, {
+	          size: 18,
+	          color: "black"
+	        })
 	      })]
+	    }), currentContext && jsxRuntimeExports.jsx(ContextDetail, {
+	      context: currentContext,
+	      isEditMode: isEditMode,
+	      onSave: handleSave,
+	      onCancel: handleCancel
 	    }), !currentContext && jsxRuntimeExports.jsx(ContextList, {
 	      contextItems: contextItems,
 	      onView: handleViewContext
-	    }), !isEditMode && jsxRuntimeExports.jsxs("button", {
-	      className: "fixed right-4 bottom-4 z-50 text-lg bg-blue-600 text-white rounded-lg hover:bg-blue-700 py-2 px-4 flex items-center justify-center gap-x-1 font-medium",
-	      onClick: addNewContext,
-	      children: [jsxRuntimeExports.jsx(BiPlus, {
-	        size: 18,
-	        color: "white"
-	      }), jsxRuntimeExports.jsx("span", {
-	        children: "New"
-	      })]
 	    })]
 	  }) : jsxRuntimeExports.jsx(AddContextForm, {
 	    onSaved: function onSaved() {

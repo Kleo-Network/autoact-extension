@@ -8,8 +8,7 @@ interface ContextListProps {
 }
 
 const ContextList: React.FC<ContextListProps> = ({ contextItems, onView }) => (
-    <div className="p-4 flex flex-col space-y-4">
-        <h1 className="mb-2 text-2xl font-bold">Your Knowledgebase</h1>
+    <div className="px-6 py-4 flex flex-col space-y-4 bg-[#fafafa] flex-1">
         {contextItems.map((item) => (
             <ContextItemComponent
                 key={item.id}
