@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { BiSolidXCircle } from 'react-icons/bi';
+import { BiX } from 'react-icons/bi';
 import { ContextItem } from '../../../sidebar/models/context.model';
 import Pills from './Pills';
+import SelectionBox from './SelectionBox';
 
 interface ModalProps {
     isOpen: boolean;
@@ -36,7 +37,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                 },
             );
         }
-    }, []);
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -46,38 +47,55 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             onClick={onClose}
         >
             <div
-                className="bg-white rounded-lg w-full max-w-screen-sm flex flex-col gap-y-4 p-4"
+                className="bg-white rounded-lg w-full max-w-screen-sm flex flex-col gap-y-[18px] p-6"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="w-full flex items-center justify-between">
+                    <h1 className="text-2xl font-semibold">Run Action</h1>
+                    <button
+                        className="rounded-full p-1 transition-colors delay-75 duration-100 ease-linear hover:bg-slate-100"
+                        onClick={onClose}
+                    >
+                        <BiX
+                            color="gray"
+                            size={24}
+                        />
+                    </button>
+                </div>
+                <div className="flex flex-col gap-y-[10px]">
+                    <p className="text-base font-medium text-gray-800">
+                        Select action to perform:
+                    </p>
                     <Pills
                         options={['Fill Form', 'Chat']}
                         selectedOption={selectedOption}
                         onSelectionChange={handleSelectionChange}
                     />
-                    <button
-                        className="hover:text-blue-600"
-                        onClick={onClose}
-                    >
-                        <BiSolidXCircle
-                            color="gray"
-                            size={30}
-                        />
-                    </button>
                 </div>
-                <Pills
+                <SelectionBox
+                    label="Select Database:"
                     options={contexts.map((context) => context.title)}
-                    selectedOption={selectedContext}
-                    onSelectionChange={handleContextSelectionChange}
+                    onSelectionChange={(event) =>
+                        setSelectedContext(event.target.value)
+                    }
                 />
-                <input
-                    type="text"
-                    className="w-full bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-2 focus:border-blue-600"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                />
-                <button className="w-fit self-end bg-blue-600 text-white rounded-lg font-medium transition-colors duration-100 ease-linear px-4 py-2 hover:bg-blue-700">
-                    Run
+                <div className="flex flex-col gap-y-[10px]">
+                    <label
+                        htmlFor="additionalDetails"
+                        className="text-base font-medium text-gray-800"
+                    >
+                        Add Additional Details:
+                    </label>
+                    <textarea
+                        id="additionalDetails"
+                        rows={2}
+                        className="w-full resize-none bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-600"
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                    />
+                </div>
+                <button className="w-fit self-end text-base font-semibold bg-blue-600 text-white rounded-lg transition-colors duration-100 ease-linear px-6 py-[10px] hover:bg-blue-700">
+                    Run Task
                 </button>
             </div>
         </div>

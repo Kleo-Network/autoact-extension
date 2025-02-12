@@ -28227,7 +28227,7 @@
 	      value: context.description,
 	      placeholder: "Description",
 	      rows: 8,
-	      className: "w-full bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-2 focus:border-blue-600",
+	      className: "w-full resize-none bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-2 focus:border-blue-600",
 	      onChange: function onChange(e) {
 	        return _onChange('description', e.target.value);
 	      }
