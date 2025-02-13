@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { BiArrowBack, BiPlus } from 'react-icons/bi';
+import { BiArrowBack, BiPlus, BiSolidPencil } from 'react-icons/bi';
 import AddContextForm from './components/AddContextForm';
 import ContextDetail from './components/ContextDetail';
 import ContextList from './components/ContextList';
@@ -82,48 +82,62 @@ const App: React.FC = () => {
     };
 
     return sidebarContentType === 'contexts' ? (
-        <div className="text-base">
+        <div className="text-base flex flex-col h-screen overflow-hidden">
+            <div className="w-full px-6 py-[14px] bg-[#EDF0F9] flex items-center justify-between">
+                {!currentContext && (
+                    <h1 className="text-lg font-semibold">
+                        Your Knowledgebase
+                    </h1>
+                )}
+                {!currentContext && !isEditMode && (
+                    <button
+                        className="text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 py-2 px-4 flex items-center justify-center gap-x-1 font-bold"
+                        onClick={addNewContext}
+                    >
+                        <BiPlus
+                            size={18}
+                            color="white"
+                        />
+                        <span>New</span>
+                    </button>
+                )}
+                {currentContext && (
+                    <button
+                        className="transition-colors duration-100 ease-linear flex items-center gap-x-2 hover:text-blue-600"
+                        onClick={() => {
+                            setCurrentContext(null);
+                            setIsEditMode(false);
+                        }}
+                    >
+                        <BiArrowBack size={18} />
+                        <span>Back to Knowledgebase</span>
+                    </button>
+                )}
+                {currentContext && !isEditMode && (
+                    <button
+                        className="cursor-pointer transition-colors delay-75 duration-100 ease-linear hover:bg-slate-200 rounded-full p-1"
+                        onClick={() => setIsEditMode(true)}
+                    >
+                        <BiSolidPencil
+                            size={18}
+                            color="black"
+                        />
+                    </button>
+                )}
+            </div>
             {currentContext && (
-                <div>
-                    <div className="w-full p-4 border-b border-gray-200">
-                        <button
-                            className="rounded-lg py-2 px-3 transition-colors duration-100 ease-linear flex items-center gap-x-2 bg-slate-200 hover:text-blue-600"
-                            onClick={() => {
-                                setCurrentContext(null);
-                                setIsEditMode(false);
-                            }}
-                        >
-                            <BiArrowBack size={18} />
-                            <span>Back to Knowledgebase</span>
-                        </button>
-                    </div>
-
-                    <ContextDetail
-                        context={currentContext}
-                        isEditMode={isEditMode}
-                        onEdit={() => setIsEditMode(true)}
-                        onSave={handleSave}
-                        onCancel={handleCancel}
-                    />
-                </div>
+                <ContextDetail
+                    context={currentContext}
+                    isEditMode={isEditMode}
+                    onSave={handleSave}
+                    onCancel={handleCancel}
+                />
             )}
             {!currentContext && (
                 <ContextList
                     contextItems={contextItems}
                     onView={handleViewContext}
                 />
-            )}
-            {!isEditMode && (
-                <button
-                    className="fixed right-4 bottom-4 z-50 text-lg bg-blue-600 text-white rounded-lg hover:bg-blue-700 py-2 px-4 flex items-center justify-center gap-x-1 font-medium"
-                    onClick={addNewContext}
-                >
-                    <BiPlus
-                        size={18}
-                        color="white"
-                    />
-                    <span>New</span>
-                </button>
             )}
         </div>
     ) : (
