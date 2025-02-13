@@ -27,7 +27,7 @@ const EditContextForm: React.FC<EditContextFormProps> = ({
                 value={context.description}
                 placeholder="Description"
                 rows={8}
-                className="w-full bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-2 focus:border-blue-600"
+                className="w-full bg-slate-100 border border-gray-200 p-2 rounded-lg resize-none focus:outline-none focus:border-2 focus:border-blue-600"
                 onChange={(e) => onChange('description', e.target.value)}
             />
             <div className="btn-group flex justify-end gap-x-2">
