@@ -46,7 +46,7 @@ const AddContextForm: React.FC<AddContextFormProps> = ({ onSaved }) => {
     };
 
     const handleCancel = () => {
-        chrome.sidePanel.setOptions({ enabled: false });
+        chrome.runtime.sendMessage({ action: 'closeSidePanel' });
         setContextFormData({
             title: '',
             description: '',

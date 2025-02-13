@@ -4,11 +4,21 @@ let contentType = 'contexts',
     scrappedPageData = {
         title: '',
         description: '',
-    };
+    },
+    isSidePanelOpen = false;
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'openSidePanel') {
         contentType = message.contentType;
+        isSidePanelOpen = true;
+
+        if (message.notifySidePanel) {
+            chrome.runtime.sendMessage({
+                action: 'updateSidebarContentType',
+                contentType,
+            });
+        }
+
         chrome.sidePanel.setOptions({ enabled: true });
         chrome.sidePanel.open({
             windowId: sender.tab.windowId,
@@ -16,8 +26,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         });
     }
 
-    if (message.action === 'getSidebarContentType') {
-        sendResponse({ contentType });
+    if (message.action === 'closeSidePanel') {
+        isSidePanelOpen = false;
+        chrome.sidePanel.setOptions({ enabled: false });
+    }
+
+    if (message.action === 'getSidebarState') {
+        sendResponse({ contentType, isSidePanelOpen });
     }
 
     if (message.action === 'scrappedPageData') {
