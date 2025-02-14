@@ -17,7 +17,7 @@ const SelectionBox: React.FC<SelectionBoxProps> = ({
                 {label}
             </label>
             <select
-                className="bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-2 focus:border-blue-600"
+                className="input-box"
                 onChange={onSelectionChange}
             >
                 {options.map((option) => (

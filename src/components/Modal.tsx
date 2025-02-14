@@ -52,9 +52,11 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="w-full flex items-center justify-between">
-                    <h1 className="text-2xl font-semibold">Run Action</h1>
+                    <h1 className="text-2xl font-semibold text-black">
+                        Run Action
+                    </h1>
                     <button
-                        className="rounded-full p-1 transition-colors delay-75 duration-100 ease-linear hover:bg-slate-100"
+                        className="icon-btn"
                         onClick={onClose}
                     >
                         <BiX
@@ -90,13 +92,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                     <textarea
                         id="additionalDetails"
                         rows={2}
-                        className="w-full resize-none bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-600"
+                        className="input-box"
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
                     />
                 </div>
                 <button
-                    className="w-fit self-end text-base font-semibold bg-blue-600 text-white rounded-lg transition-colors duration-100 ease-linear px-6 py-[10px] hover:bg-blue-700"
+                    className="btn-primary self-end px-6"
                     onClick={handleRunScript}
                 >
                     Run Task

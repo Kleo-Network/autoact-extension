@@ -91,7 +91,7 @@ const App: React.FC = () => {
                 )}
                 {!currentContext && !isEditMode && (
                     <button
-                        className="text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 py-2 px-4 flex items-center justify-center gap-x-1 font-bold"
+                        className="btn-primary flex items-center justify-center gap-x-1"
                         onClick={addNewContext}
                     >
                         <BiPlus
@@ -103,7 +103,7 @@ const App: React.FC = () => {
                 )}
                 {currentContext && (
                     <button
-                        className="transition-colors duration-100 ease-linear flex items-center gap-x-2 hover:text-blue-600"
+                        className="transition-all duration-150 delay-75 ease-linear text-black flex items-center gap-x-2 hover:text-blue-600"
                         onClick={() => {
                             setCurrentContext(null);
                             setIsEditMode(false);
@@ -115,7 +115,7 @@ const App: React.FC = () => {
                 )}
                 {currentContext && !isEditMode && (
                     <button
-                        className="cursor-pointer transition-colors delay-75 duration-100 ease-linear hover:bg-slate-200 rounded-full p-1"
+                        className="icon-btn hover:bg-white"
                         onClick={() => setIsEditMode(true)}
                     >
                         <BiSolidPencil

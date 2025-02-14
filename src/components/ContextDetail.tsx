@@ -54,15 +54,13 @@ const ContextDetail: React.FC<ContextDetailProps> = ({
     return (
         <div className="px-6 py-4 w-full">
             {!isEditMode ? (
-                <div className="w-full">
+                <div className="w-full text-black">
                     <div className="flex justify-between items-center">
                         <h1 className="text-2xl font-semibold">
                             {context.title}
                         </h1>
                     </div>
-                    <p className="text-gray-600 text-sm mt-4">
-                        {context.description}
-                    </p>
+                    <p className="text-sm mt-4">{context.description}</p>
                 </div>
             ) : (
                 <EditContextForm
