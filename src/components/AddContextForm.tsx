@@ -54,8 +54,8 @@ const AddContextForm: React.FC<AddContextFormProps> = ({ onSaved }) => {
     };
 
     return (
-        <div className="p-4 text-base flex flex-col gap-y-4">
-            <h1 className="text-2xl font-semibold">Add New Context</h1>
+        <div className="px-6 py-4 text-base flex flex-col gap-y-4">
+            <h1 className="text-2xl font-semibold mb-2">Add New Context</h1>
             <EditContextForm
                 context={contextFormData}
                 onChange={handleChange}

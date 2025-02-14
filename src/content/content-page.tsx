@@ -44,7 +44,6 @@ const ContentPage: React.FC = () => {
 
     const handleMouseDown = (event: MouseEvent) => {
         const element = event.composedPath()[0] as HTMLElement;
-        console.log(element);
 
         if (
             element.id === 'btnAddToKnowledgebase' ||
@@ -127,7 +126,7 @@ const ContentPage: React.FC = () => {
     };
 
     return (
-        <div>
+        <div className="font-inter">
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
@@ -135,7 +134,7 @@ const ContentPage: React.FC = () => {
             {showAddButton && (
                 <button
                     id="btnAddToKnowledgebase"
-                    className="absolute z-50 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 py-2 px-3 flex items-center gap-x-1 font-medium"
+                    className="absolute z-50 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 py-2 px-3 flex items-center gap-x-1 font-medium transition-all delay-75 duration-100 ease-linear"
                     style={{
                         left: buttonPosition.x,
                         top: buttonPosition.y + 4,
@@ -149,9 +148,9 @@ const ContentPage: React.FC = () => {
                     <span>Add to AutoAct</span>
                 </button>
             )}
-            <div className="buttons-wrapper fixed top-[42%] right-0 flex flex-col bg-blue-600 w-fit p-1 rounded-tl-lg rounded-bl-lg z-50">
+            <div className="buttons-wrapper fixed top-[42%] right-0 flex flex-col gap-y-1 bg-blue-600 w-fit p-1 rounded-tl-lg rounded-bl-lg z-[999]">
                 <button
-                    className="p-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800"
+                    className="toolbar-btn"
                     title="Magic"
                 >
                     <BiSolidMagicWand
@@ -160,7 +159,7 @@ const ContentPage: React.FC = () => {
                     />
                 </button>
                 <button
-                    className="p-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800"
+                    className="toolbar-btn"
                     onClick={() => {
                         setIsModalOpen(true);
                         removeSelection();
@@ -173,7 +172,7 @@ const ContentPage: React.FC = () => {
                     />
                 </button>
                 <button
-                    className="p-1 mt-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800"
+                    className="toolbar-btn"
                     onClick={handleKnowledgebaseClick}
                     title="Knowledgebase"
                 >
