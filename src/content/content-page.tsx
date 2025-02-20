@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BiData, BiPlay, BiPlus, BiSolidMagicWand } from 'react-icons/bi';
 import Modal from '../components/Modal';
-import { ContextFormValues } from '../models/context.model';
+import { ContextFormValues, ContextItem } from '../models/context.model';
 
 interface ButtonPosition {
     x: number;
@@ -18,7 +18,8 @@ const ContentPage: React.FC = () => {
         [pageData, setPageData] = useState<ContextFormValues>({
             title: '',
             description: '',
-        });
+        }),
+        [contexts, setContexts] = useState<ContextItem[]>([]);
 
     const handleMouseUp = () => {
         const selection = window.getSelection(),
@@ -61,12 +62,33 @@ const ContentPage: React.FC = () => {
         }, 0);
     };
 
+    const fetchContexts = () => {
+        chrome.runtime.sendMessage(
+            { action: 'getContexts' },
+            (response: { data: ContextItem[]; error: string | null }) => {
+                if (response && !response.error) {
+                    setContexts(response.data);
+                }
+            },
+        );
+    };
+
+    const handleRefetchContexts = (message: { action: string }) => {
+        console.log(message.action);
+        if (message.action === 'refetchContexts') fetchContexts();
+    };
+
     useEffect(() => {
+        fetchContexts();
+        chrome.runtime.onMessage.addListener(handleRefetchContexts);
+
         document.addEventListener('mouseup', handleMouseUp);
         document.addEventListener('mousedown', handleMouseDown);
         document.addEventListener('click', handleClick);
 
         return () => {
+            chrome.runtime.onMessage.removeListener(handleRefetchContexts);
+
             document.removeEventListener('mouseup', handleMouseUp);
             document.removeEventListener('mousedown', handleMouseDown);
             document.removeEventListener('click', handleClick);
@@ -130,6 +152,7 @@ const ContentPage: React.FC = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
+                contexts={contexts}
             />
             {showAddButton && (
                 <button
@@ -159,15 +182,16 @@ const ContentPage: React.FC = () => {
                     />
                 </button>
                 <button
-                    className="toolbar-btn"
+                    className={`toolbar-btn ${contexts.length === 0 ? 'hover:bg-blue-600' : ''}`}
                     onClick={() => {
                         setIsModalOpen(true);
                         removeSelection();
                     }}
+                    disabled={contexts.length === 0}
                     title="Run"
                 >
                     <BiPlay
-                        color="white"
+                        color={contexts.length === 0 ? '#ffffff3b' : 'white'}
                         size={30}
                     />
                 </button>

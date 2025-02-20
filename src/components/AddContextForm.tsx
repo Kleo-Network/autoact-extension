@@ -42,6 +42,7 @@ const AddContextForm: React.FC<AddContextFormProps> = ({ onSaved }) => {
         }
 
         await addNewContext(contextFormData);
+        chrome.runtime.sendMessage({ action: 'informModalToRefetchContexts' });
         onSaved();
     };
 
