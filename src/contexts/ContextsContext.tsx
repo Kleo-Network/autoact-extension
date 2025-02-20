@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useEffect, useState } from 'react';
 import {
     addNewContextToDB,
     getAllContextsFromDB,
@@ -14,6 +14,7 @@ interface ContextsContextType {
     saveError: string | null;
     addNewContext: (context: ContextFormValues) => Promise<void>;
     updateContext: (updateContext: ContextItem) => Promise<void>;
+    charactersCount: number;
 }
 
 const ContextsContext = createContext<ContextsContextType>({
@@ -24,6 +25,7 @@ const ContextsContext = createContext<ContextsContextType>({
     saveError: null,
     addNewContext: async () => {},
     updateContext: async () => {},
+    charactersCount: 0,
 });
 
 const ContextsProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -33,7 +35,21 @@ const ContextsProvider: React.FC<{ children: React.ReactNode }> = ({
         [isLoading, setIsLoading] = useState(false),
         [isSaving, setIsSaving] = useState(false),
         [error, setError] = useState<string | null>(null),
-        [saveError, setSaveError] = useState<string | null>(null);
+        [saveError, setSaveError] = useState<string | null>(null),
+        [charactersCount, setCharactersCount] = useState<number>(0);
+
+    const updateCharactersCount = useCallback(() => {
+        const totalCharacters = contexts.reduce(
+            (sum, context) =>
+                sum + context.title.length + context.description.length,
+            0,
+        );
+        setCharactersCount(totalCharacters);
+    }, [contexts]);
+
+    useEffect(() => {
+        updateCharactersCount();
+    }, [contexts, updateCharactersCount]);
 
     const fetchContexts = async () => {
         setIsLoading(true);
@@ -102,6 +118,7 @@ const ContextsProvider: React.FC<{ children: React.ReactNode }> = ({
                 saveError,
                 addNewContext,
                 updateContext,
+                charactersCount,
             }}
         >
             {children}

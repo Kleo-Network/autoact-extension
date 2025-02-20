@@ -69,6 +69,7 @@ const ContextDetail: React.FC<ContextDetailProps> = ({
                     onChange={handleContextDataChange}
                     onSave={handleSave}
                     onCancel={handleCancel}
+                    isEditForm={true}
                 />
             )}
         </div>
