@@ -1,23 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { BiX } from 'react-icons/bi';
 import { ContextItem } from '../models/context.model';
-import Pills from './Pills';
 import SelectionBox from './SelectionBox';
 
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
+    contexts: ContextItem[];
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
-    const [selectedOption, setSelectedOption] = useState('Fill Form'),
-        [prompt, setPrompt] = useState(''),
-        [contexts, setContexts] = useState<ContextItem[]>([]),
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, contexts }) => {
+    const [prompt, setPrompt] = useState(''),
         [selectedContext, setSelectedContext] = useState('');
-
-    const handleSelectionChange = (option: string) => {
-        setSelectedOption(option);
-    };
 
     const handleRunScript = () => {
         console.log('Selected Context:', selectedContext);
@@ -25,20 +19,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     };
 
     useEffect(() => {
-        if (isOpen) {
-            chrome.runtime.sendMessage(
-                { action: 'getContexts' },
-                (response: { data: ContextItem[]; error: string | null }) => {
-                    if (response && !response.error) {
-                        setContexts(response.data);
-                        setSelectedContext(
-                            response.data.length ? response.data[0].title : '',
-                        );
-                    }
-                },
-            );
-        }
-    }, [isOpen]);
+        setSelectedContext(contexts.length ? contexts[0].title : '');
+    }, [contexts]);
 
     if (!isOpen) return null;
 
@@ -64,16 +46,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                             size={24}
                         />
                     </button>
-                </div>
-                <div className="flex flex-col gap-y-[10px]">
-                    <p className="text-base font-medium text-gray-800">
-                        Select action to perform:
-                    </p>
-                    <Pills
-                        options={['Fill Form', 'Chat']}
-                        selectedOption={selectedOption}
-                        onSelectionChange={handleSelectionChange}
-                    />
                 </div>
                 <SelectionBox
                     label="Select context from knowledgebase:"

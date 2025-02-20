@@ -44,6 +44,7 @@ const ContextDetail: React.FC<ContextDetailProps> = ({
             id: context.id,
             ...contextData,
         });
+        chrome.runtime.sendMessage({ action: 'informModalToRefetchContexts' });
         onSave(contextData);
     };
 
