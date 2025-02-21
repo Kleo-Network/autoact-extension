@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { ContextsContext } from '../contexts/ContextsContext';
 import { ContextFormValues, ContextItem } from '../models/context.model';
-import EditContextForm from './EditContextForm';
+import ContextForm from './ContextForm';
 
 interface ContextDetailProps {
     context: ContextItem;
@@ -64,11 +64,12 @@ const ContextDetail: React.FC<ContextDetailProps> = ({
                     <p className="text-sm mt-4">{context.description}</p>
                 </div>
             ) : (
-                <EditContextForm
+                <ContextForm
                     context={contextData}
                     onChange={handleContextDataChange}
                     onSave={handleSave}
                     onCancel={handleCancel}
+                    isEditForm={true}
                 />
             )}
         </div>

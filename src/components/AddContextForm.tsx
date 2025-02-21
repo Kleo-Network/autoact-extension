@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { ContextsContext } from '../contexts/ContextsContext';
 import { ContextFormValues } from '../models/context.model';
-import EditContextForm from './EditContextForm';
+import ContextForm from './ContextForm';
 
 interface AddContextFormProps {
     onSaved: () => void;
@@ -15,7 +15,7 @@ const AddContextForm: React.FC<AddContextFormProps> = ({ onSaved }) => {
             }),
         { addNewContext } = useContext(ContextsContext);
 
-    useEffect(() => {
+    const getContextFormData = () => {
         chrome.runtime.sendMessage(
             { action: 'getPageData' },
             (response: { pageData: ContextFormValues } | undefined) => {
@@ -24,6 +24,18 @@ const AddContextForm: React.FC<AddContextFormProps> = ({ onSaved }) => {
                 }
             },
         );
+    };
+
+    const updateContextFormData = (message: { action: string }) => {
+        if (message.action === 'updatePageData') getContextFormData();
+    };
+
+    useEffect(() => {
+        getContextFormData();
+        chrome.runtime.onMessage.addListener(updateContextFormData);
+
+        return () =>
+            chrome.runtime.onMessage.removeListener(updateContextFormData);
     }, []);
 
     const handleChange = (name: keyof ContextFormValues, value: string) => {
@@ -57,7 +69,7 @@ const AddContextForm: React.FC<AddContextFormProps> = ({ onSaved }) => {
     return (
         <div className="px-6 py-4 text-base flex flex-col gap-y-4">
             <h1 className="text-2xl font-semibold mb-2">Add New Context</h1>
-            <EditContextForm
+            <ContextForm
                 context={contextFormData}
                 onChange={handleChange}
                 onSave={handleSave}
