@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { ContextsContext } from '../contexts/ContextsContext';
 import { ContextFormValues } from '../models/context.model';
-import EditContextForm from './EditContextForm';
+import ContextForm from './ContextForm';
 
 interface AddContextFormProps {
     onSaved: () => void;
@@ -57,7 +57,7 @@ const AddContextForm: React.FC<AddContextFormProps> = ({ onSaved }) => {
     return (
         <div className="px-6 py-4 text-base flex flex-col gap-y-4">
             <h1 className="text-2xl font-semibold mb-2">Add New Context</h1>
-            <EditContextForm
+            <ContextForm
                 context={contextFormData}
                 onChange={handleChange}
                 onSave={handleSave}

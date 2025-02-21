@@ -3,7 +3,7 @@ import { MAX_CHARACTER_LIMIT } from '../constants/common.constants';
 import { ContextsContext } from '../contexts/ContextsContext';
 import { ContextFormValues } from '../models/context.model';
 
-interface EditContextFormProps {
+interface ContextFormProps {
     context: ContextFormValues;
     onChange: (name: keyof ContextFormValues, value: string) => void;
     onSave: () => void;
@@ -11,7 +11,7 @@ interface EditContextFormProps {
     isEditForm?: boolean;
 }
 
-const EditContextForm: React.FC<EditContextFormProps> = ({
+const ContextForm: React.FC<ContextFormProps> = ({
     context,
     onChange,
     onSave,
@@ -19,11 +19,13 @@ const EditContextForm: React.FC<EditContextFormProps> = ({
     isEditForm,
 }) => {
     const { charactersCount } = useContext(ContextsContext),
-        [isSaveDisabled, setIsSaveDisabled] = useState(false),
         [previousCharactersCount, setPreviousCharactersCount] = useState(0),
         [currentCharactersCount, setCurrentCharactersCount] = useState(0),
         [isCharactersCountAdjusted, setIsCharactersCountAdjusted] =
-            useState(false);
+            useState(false),
+        [isCharactersLimitExceeded, setIsCharactersLimitExceeded] =
+            useState(false),
+        [isInvalidContextDetails, setIsInvalidContextDetails] = useState(false);
 
     useEffect(() => {
         if (isEditForm && !isCharactersCountAdjusted) {
@@ -48,7 +50,11 @@ const EditContextForm: React.FC<EditContextFormProps> = ({
 
         if (!isLimitExceed) setCurrentCharactersCount(newCharactersCount);
 
-        setIsSaveDisabled(isLimitExceed);
+        setIsInvalidContextDetails(
+            context.title.trim().length === 0 ||
+                context.description.trim().length === 0,
+        );
+        setIsCharactersLimitExceeded(isLimitExceed);
     }, [previousCharactersCount, context.title, context.description]);
 
     return (
@@ -70,19 +76,23 @@ const EditContextForm: React.FC<EditContextFormProps> = ({
                 onChange={(e) => onChange('description', e.target.value)}
             />
             <p
-                className={`text-sm font-medium ${isSaveDisabled ? 'text-red-600' : ''}`}
+                className={`text-sm font-medium ${isCharactersLimitExceeded ? 'text-red-600' : ''}`}
             >
-                {isSaveDisabled
+                {isCharactersLimitExceeded
                     ? `You've exceeded limit of ${MAX_CHARACTER_LIMIT.toLocaleString()} characters`
                     : `${currentCharactersCount.toLocaleString()} / ${MAX_CHARACTER_LIMIT.toLocaleString()} characters`}
             </p>
             <div className="btn-group flex justify-end gap-x-3">
                 <button
                     className={
-                        isSaveDisabled ? 'btn-primary-disabled' : 'btn-primary'
+                        isCharactersLimitExceeded || isInvalidContextDetails
+                            ? 'btn-primary-disabled'
+                            : 'btn-primary'
                     }
                     onClick={onSave}
-                    disabled={isSaveDisabled}
+                    disabled={
+                        isCharactersLimitExceeded || isInvalidContextDetails
+                    }
                 >
                     Save
                 </button>
@@ -97,4 +107,4 @@ const EditContextForm: React.FC<EditContextFormProps> = ({
     );
 };
 
-export default EditContextForm;
+export default ContextForm;
