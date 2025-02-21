@@ -15,7 +15,7 @@ const AddContextForm: React.FC<AddContextFormProps> = ({ onSaved }) => {
             }),
         { addNewContext } = useContext(ContextsContext);
 
-    useEffect(() => {
+    const getContextFormData = () => {
         chrome.runtime.sendMessage(
             { action: 'getPageData' },
             (response: { pageData: ContextFormValues } | undefined) => {
@@ -24,6 +24,18 @@ const AddContextForm: React.FC<AddContextFormProps> = ({ onSaved }) => {
                 }
             },
         );
+    };
+
+    const updateContextFormData = (message: { action: string }) => {
+        if (message.action === 'updatePageData') getContextFormData();
+    };
+
+    useEffect(() => {
+        getContextFormData();
+        chrome.runtime.onMessage.addListener(updateContextFormData);
+
+        return () =>
+            chrome.runtime.onMessage.removeListener(updateContextFormData);
     }, []);
 
     const handleChange = (name: keyof ContextFormValues, value: string) => {

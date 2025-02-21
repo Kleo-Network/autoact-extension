@@ -37,6 +37,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.action === 'scrappedPageData') {
         scrappedPageData = message.pageData;
+        chrome.runtime.sendMessage({ action: 'updatePageData' });
     }
 
     if (message.action === 'getPageData') {
