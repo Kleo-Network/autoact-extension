@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { BiData, BiPlay, BiPlus, BiSolidMagicWand } from 'react-icons/bi';
+import AddToAutoAct from '../components/AddToAutoAct';
 import Modal from '../components/Modal';
+import Toolbar from '../components/Toolbar';
+import { ButtonPosition } from '../models/common.model';
 import { ContextFormValues, ContextItem } from '../models/context.model';
-
-interface ButtonPosition {
-    x: number;
-    y: number;
-}
 
 const ContentPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false),
@@ -74,7 +71,6 @@ const ContentPage: React.FC = () => {
     };
 
     const handleRefetchContexts = (message: { action: string }) => {
-        console.log(message.action);
         if (message.action === 'refetchContexts') fetchContexts();
     };
 
@@ -111,40 +107,13 @@ const ContentPage: React.FC = () => {
         });
     };
 
-    const sendPageData = () => {
+    const sendSelectedDataToSidebar = () => {
         removeSelection();
         chrome.runtime.sendMessage({
             action: 'scrappedPageData',
             pageData,
         });
         openSidebar('addNewContext', true);
-    };
-
-    const handleKnowledgebaseClick = () => {
-        chrome.runtime.sendMessage(
-            { action: 'getSidebarState' },
-            (
-                response:
-                    | {
-                          contentType: 'contexts' | 'addNewContext';
-                          isSidePanelOpen: boolean;
-                      }
-                    | undefined,
-            ) => {
-                if (response && response.isSidePanelOpen) {
-                    if (response.contentType === 'addNewContext')
-                        openSidebar('contexts', true);
-                    else {
-                        chrome.runtime.sendMessage({
-                            action: 'closeSidePanel',
-                        });
-                    }
-                } else {
-                    openSidebar('contexts', true);
-                }
-            },
-        );
-        removeSelection();
     };
 
     return (
@@ -155,57 +124,17 @@ const ContentPage: React.FC = () => {
                 contexts={contexts}
             />
             {showAddButton && (
-                <button
-                    id="btnAddToKnowledgebase"
-                    className="absolute z-50 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 py-2 px-3 flex items-center gap-x-1 font-medium transition-all delay-75 duration-100 ease-linear"
-                    style={{
-                        left: buttonPosition.x,
-                        top: buttonPosition.y + 4,
-                    }}
-                    onClick={sendPageData}
-                >
-                    <BiPlus
-                        size={14}
-                        color="white"
-                    />
-                    <span>Add to AutoAct</span>
-                </button>
+                <AddToAutoAct
+                    buttonPosition={buttonPosition}
+                    sendSelectedDataToSidebar={sendSelectedDataToSidebar}
+                />
             )}
-            <div className="buttons-wrapper fixed top-[42%] right-0 flex flex-col gap-y-1 bg-blue-600 w-fit p-1 rounded-tl-lg rounded-bl-lg z-[999]">
-                <button
-                    className="toolbar-btn"
-                    title="Magic"
-                >
-                    <BiSolidMagicWand
-                        color="white"
-                        size={30}
-                    />
-                </button>
-                <button
-                    className={`toolbar-btn ${contexts.length === 0 ? 'hover:bg-blue-600' : ''}`}
-                    onClick={() => {
-                        setIsModalOpen(true);
-                        removeSelection();
-                    }}
-                    disabled={contexts.length === 0}
-                    title="Run"
-                >
-                    <BiPlay
-                        color={contexts.length === 0 ? '#ffffff3b' : 'white'}
-                        size={30}
-                    />
-                </button>
-                <button
-                    className="toolbar-btn"
-                    onClick={handleKnowledgebaseClick}
-                    title="Knowledgebase"
-                >
-                    <BiData
-                        color="white"
-                        size={30}
-                    />
-                </button>
-            </div>
+            <Toolbar
+                contexts={contexts}
+                openSidebar={openSidebar}
+                removeSelection={removeSelection}
+                openModal={() => setIsModalOpen(true)}
+            />
         </div>
     );
 };

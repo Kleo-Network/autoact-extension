@@ -30,13 +30,9 @@
     font-style: normal;
 }
 
-* {
-    @apply font-inter;
-}
-
 @layer components {
     .input-box {
-        @apply text-black w-full py-3 px-4 rounded-lg bg-[#fafafa] border border-gray-300 resize-none focus:outline-none focus:border-2 focus:border-blue-600;
+        @apply text-gray-600 w-full py-3 px-4 rounded-lg bg-[#fafafa] border border-gray-300 resize-none focus:outline-none focus:border-2 focus:border-blue-600;
     }
 
     .btn-primary {
