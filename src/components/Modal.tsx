@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BiX } from 'react-icons/bi';
+import { ALL_VALUES_SELECTED } from '../constants/common.constants';
 import { ContextItem } from '../models/context.model';
-import SelectionBox from './SelectionBox';
+import MultiSelect from './MultiSelect';
 
 interface ModalProps {
     isOpen: boolean;
@@ -10,17 +11,51 @@ interface ModalProps {
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, contexts }) => {
-    const [prompt, setPrompt] = useState(''),
-        [selectedContext, setSelectedContext] = useState('');
-
-    const handleRunScript = () => {
-        console.log('Selected Context:', selectedContext);
-        console.log('Additional Info:', prompt);
-    };
+    const [additionalInfo, setAdditionalInfo] = useState(''),
+        [selectedContexts, setSelectedContexts] = useState<(string | number)[]>(
+            [ALL_VALUES_SELECTED],
+        );
 
     useEffect(() => {
-        setSelectedContext(contexts.length ? contexts[0].title : '');
-    }, [contexts]);
+        setSelectedContexts([ALL_VALUES_SELECTED]);
+    }, [isOpen]);
+
+    const handleRunScript = () => {
+        console.log('Selected Contexts:', selectedContexts);
+        console.log('Additional Info:', additionalInfo);
+    };
+
+    const handleSelections = useCallback(
+        (selectedId: number | string) => {
+            const isAllSelected =
+                    selectedContexts.length !== 0 &&
+                    selectedContexts[0] === ALL_VALUES_SELECTED,
+                isFound = selectedContexts.includes(selectedId);
+
+            if (!isAllSelected) {
+                if (isFound) {
+                    const updatedSelections = selectedContexts.filter(
+                        (selectedContext) => selectedContext !== selectedId,
+                    );
+                    setSelectedContexts(updatedSelections);
+                } else {
+                    const updatedSelections = [...selectedContexts, selectedId];
+                    setSelectedContexts(
+                        updatedSelections.length === contexts.length
+                            ? [ALL_VALUES_SELECTED]
+                            : updatedSelections,
+                    );
+                }
+            } else {
+                setSelectedContexts(
+                    contexts
+                        .filter((context) => context.id !== selectedId)
+                        .map((context) => context.id),
+                );
+            }
+        },
+        [selectedContexts, contexts],
+    );
 
     if (!isOpen) return null;
 
@@ -47,12 +82,16 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, contexts }) => {
                         />
                     </button>
                 </div>
-                <SelectionBox
-                    label="Select context from knowledgebase:"
-                    options={contexts.map((context) => context.title)}
-                    onSelectionChange={(event) =>
-                        setSelectedContext(event.target.value)
-                    }
+                <MultiSelect
+                    label="Select contexts from knowledgebase:"
+                    placeHolder="Select one or more contexts..."
+                    selected={selectedContexts}
+                    options={contexts.map((context) => ({
+                        id: context.id,
+                        value: context.title,
+                    }))}
+                    clearSelections={() => setSelectedContexts([])}
+                    onSelection={handleSelections}
                 />
                 <div className="flex flex-col gap-y-[10px]">
                     <label
@@ -65,13 +104,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, contexts }) => {
                         id="additionalDetails"
                         rows={2}
                         className="input-box"
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
+                        value={additionalInfo}
+                        onChange={(e) => setAdditionalInfo(e.target.value)}
                     />
                 </div>
                 <button
-                    className="btn-primary self-end px-6"
+                    className={`${selectedContexts.length === 0 ? 'btn-primary-disabled' : 'btn-primary'} self-end px-6`}
                     onClick={handleRunScript}
+                    disabled={selectedContexts.length === 0}
                 >
                     Run Task
                 </button>

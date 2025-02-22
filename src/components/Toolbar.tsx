@@ -95,10 +95,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         removeSelection();
     };
 
-    if (!showToolbar) {
-        chrome.runtime.sendMessage({ action: 'closeSidePanel' });
-        return null;
-    }
+    if (!showToolbar) return null;
 
     return (
         <div className="buttons-wrapper fixed top-[42%] right-0 flex flex-col gap-y-1 bg-blue-600 w-fit p-1 rounded-tl-lg rounded-bl-lg z-[999]">
