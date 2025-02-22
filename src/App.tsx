@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { BiArrowBack, BiPlus, BiSolidPencil } from 'react-icons/bi';
 import AddContextForm from './components/AddContextForm';
 import ContextDetail from './components/ContextDetail';
@@ -8,36 +8,33 @@ import { ContextFormValues, ContextItem } from './models/context.model';
 
 const App: React.FC = () => {
     const { contexts: contextItems } = useContext(ContextsContext),
-        [currentContext, setCurrentContext] =
-            React.useState<ContextItem | null>(null),
-        [isEditMode, setIsEditMode] = React.useState(false),
-        [sidebarContentType, setSidebarContentType] = React.useState<
+        [currentContext, setCurrentContext] = useState<ContextItem | null>(
+            null,
+        ),
+        [isEditMode, setIsEditMode] = useState(false),
+        [sidebarContentType, setSidebarContentType] = useState<
             'contexts' | 'addNewContext'
         >('contexts');
 
     useEffect(() => {
         chrome.runtime.sendMessage(
             { action: 'getSidebarState' },
-            (
-                response:
-                    | { contentType: 'contexts' | 'addNewContext' }
-                    | undefined,
-            ) => {
+            (response?: { contentType: 'contexts' | 'addNewContext' }) => {
                 if (response) {
                     setSidebarContentType(response.contentType);
                 }
             },
         );
 
-        const handleMessage = (message: {
+        const handleMessage = ({
+            action,
+            contentType,
+        }: {
             action: string;
             contentType?: 'contexts' | 'addNewContext';
         }) => {
-            if (
-                message.action === 'updateSidebarContentType' &&
-                message.contentType
-            ) {
-                setSidebarContentType(message.contentType);
+            if (action === 'updateSidebarContentType' && contentType) {
+                setSidebarContentType(contentType);
             }
         };
 
@@ -53,16 +50,10 @@ const App: React.FC = () => {
         setIsEditMode(false);
     };
 
-    const handleCancel = () => setIsEditMode(false);
-
     const handleSave = (updateContext: ContextFormValues) => {
-        setCurrentContext((prevContext) => {
-            if (!prevContext) return null;
-            return {
-                ...prevContext,
-                ...updateContext,
-            };
-        });
+        setCurrentContext((prevContext) =>
+            prevContext ? { ...prevContext, ...updateContext } : null,
+        );
         setIsEditMode(false);
     };
 
@@ -98,15 +89,12 @@ const App: React.FC = () => {
         <div className="text-base flex flex-col h-screen overflow-hidden">
             <div className="w-full px-6 py-[14px] bg-[#EDF0F9] flex items-center justify-between">
                 {sidebarContentType === 'contexts' && !currentContext && (
-                    <h1 className="text-lg font-semibold">
-                        Your Knowledgebase
-                    </h1>
-                )}
-                {sidebarContentType === 'contexts' &&
-                    !currentContext &&
-                    !isEditMode && (
+                    <>
+                        <h1 className="text-lg font-semibold">
+                            Your Knowledgebase
+                        </h1>
                         <button
-                            className="btn-primary flex items-center justify-center gap-x-1"
+                            className="btn-primary flex items-center gap-x-1"
                             onClick={addNewContext}
                         >
                             <BiPlus
@@ -115,7 +103,8 @@ const App: React.FC = () => {
                             />
                             <span>New</span>
                         </button>
-                    )}
+                    </>
+                )}
                 {(currentContext || sidebarContentType === 'addNewContext') && (
                     <button
                         className="transition-all duration-150 delay-75 ease-linear text-black flex items-center gap-x-2 hover:text-blue-600"
@@ -152,24 +141,20 @@ const App: React.FC = () => {
                         </button>
                     )}
             </div>
-            {sidebarContentType === 'contexts' && (
-                <>
-                    {currentContext && (
-                        <ContextDetail
-                            context={currentContext}
-                            isEditMode={isEditMode}
-                            onSave={handleSave}
-                            onCancel={handleCancel}
-                        />
-                    )}
-                    {!currentContext && (
-                        <ContextList
-                            contextItems={contextItems}
-                            onView={handleViewContext}
-                        />
-                    )}
-                </>
-            )}
+            {sidebarContentType === 'contexts' &&
+                (currentContext ? (
+                    <ContextDetail
+                        context={currentContext}
+                        isEditMode={isEditMode}
+                        onSave={handleSave}
+                        onCancel={() => setIsEditMode(false)}
+                    />
+                ) : (
+                    <ContextList
+                        contextItems={contextItems}
+                        onView={handleViewContext}
+                    />
+                ))}
             {sidebarContentType === 'addNewContext' && (
                 <AddContextForm
                     onSaved={() => {
