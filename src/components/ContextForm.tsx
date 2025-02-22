@@ -25,7 +25,8 @@ const ContextForm: React.FC<ContextFormProps> = ({
             useState(false),
         [isCharactersLimitExceeded, setIsCharactersLimitExceeded] =
             useState(false),
-        [isInvalidContextDetails, setIsInvalidContextDetails] = useState(false);
+        isInvalidContextDetails =
+            !context.title.trim() || !context.description.trim();
 
     useEffect(() => {
         if (isEditForm && !isCharactersCountAdjusted) {
@@ -50,10 +51,6 @@ const ContextForm: React.FC<ContextFormProps> = ({
 
         if (!isLimitExceed) setCurrentCharactersCount(newCharactersCount);
 
-        setIsInvalidContextDetails(
-            context.title.trim().length === 0 ||
-                context.description.trim().length === 0,
-        );
         setIsCharactersLimitExceeded(isLimitExceed);
     }, [previousCharactersCount, context.title, context.description]);
 
