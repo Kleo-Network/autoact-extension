@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BiData, BiPlay, BiSolidMagicWand } from 'react-icons/bi';
-import { TOOLBAR_ID } from '../constants/common.constants';
-import { ContextItem } from '../models/context.model';
+import { TOOLBAR_ID } from '../../constants/common.constants';
+import { ContextItem } from '../../models/common.model';
 
 interface ToolbarProps {
     contexts: ContextItem[];

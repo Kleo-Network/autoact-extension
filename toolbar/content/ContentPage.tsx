@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { BiData, BiPlay, BiPlus, BiSolidMagicWand } from 'react-icons/bi';
-import { ContextFormValues } from '../../sidebar/models/context.model';
+import {
+    ButtonPosition,
+    ContextFormValues,
+    ContextItem,
+} from '../models/common.model';
+import AddToAutoAct from './components/AddToAutoAct';
 import Modal from './components/Modal';
-
-interface ButtonPosition {
-    x: number;
-    y: number;
-}
+import Toolbar from './components/Toolbar';
 
 const ContentPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false),
@@ -18,50 +18,86 @@ const ContentPage: React.FC = () => {
         [pageData, setPageData] = useState<ContextFormValues>({
             title: '',
             description: '',
-        });
+        }),
+        [contexts, setContexts] = useState<ContextItem[]>([]);
+
+    const handleMouseUp = () => {
+        const selection = window.getSelection(),
+            selectedText = selection?.toString().trim() || '';
+
+        if (selectedText?.length !== 0 && selection?.rangeCount) {
+            setShowAddButton(false);
+            setPageData({
+                title: document.title,
+                description: selectedText,
+            });
+
+            const range = selection.getRangeAt(0),
+                rect = range.getBoundingClientRect();
+            setButtonPosition({
+                x: rect.left + window.scrollX,
+                y: rect.bottom + window.scrollY,
+            });
+
+            setShowAddButton(true);
+        }
+    };
+
+    const handleMouseDown = (event: MouseEvent) => {
+        const element = event.composedPath()[0] as HTMLElement;
+
+        if (
+            element.id === 'btnAddToKnowledgebase' ||
+            element.closest('#btnAddToKnowledgebase')
+        )
+            return;
+
+        setShowAddButton(false);
+    };
+
+    const handleClick = () => {
+        setTimeout(() => {
+            const selection = window.getSelection()?.toString().trim();
+            if (!selection) setShowAddButton(false);
+        }, 0);
+    };
+
+    const fetchContexts = () => {
+        chrome.runtime.sendMessage(
+            { action: 'getContexts' },
+            (response: { data: ContextItem[]; error: string | null }) => {
+                if (response && !response.error) {
+                    setContexts(response.data);
+                }
+            },
+        );
+    };
+
+    const handleRefetchContexts = (message: { action: string }) => {
+        if (message.action === 'refetchContexts') fetchContexts();
+    };
 
     useEffect(() => {
-        document.addEventListener('mouseup', (event: MouseEvent) => {
-            const selection = window.getSelection(),
-                selectedText = selection?.toString().trim() || '';
+        fetchContexts();
+        chrome.runtime.onMessage.addListener(handleRefetchContexts);
 
-            if (selectedText?.length !== 0 && selection?.rangeCount) {
-                setShowAddButton(false);
-                setPageData({
-                    title: document.title,
-                    description: selectedText,
-                });
+        document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('click', handleClick);
 
-                const range = selection.getRangeAt(0),
-                    rect = range.getBoundingClientRect();
-                setButtonPosition({
-                    x: rect.left + window.scrollX,
-                    y: rect.bottom + window.scrollY,
-                });
+        return () => {
+            chrome.runtime.onMessage.removeListener(handleRefetchContexts);
 
-                setShowAddButton(true);
-            }
-        });
-
-        document.addEventListener('mousedown', (event: MouseEvent) => {
-            const element = event.target as HTMLElement;
-
-            if (
-                element.id === 'btnAddToKnowledgebase' ||
-                element.parentElement?.id === 'btnAddToKnowledgebase'
-            )
-                return;
-
-            setShowAddButton(false);
-        });
-
-        document.addEventListener('click', () => {
-            setTimeout(() => {
-                const selection = window.getSelection()?.toString().trim();
-                if (!selection) setShowAddButton(false);
-            }, 0);
-        });
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.removeEventListener('mousedown', handleMouseDown);
+            document.removeEventListener('click', handleClick);
+        };
     }, []);
+
+    const removeSelection = () => {
+        document.getSelection()?.removeAllRanges();
+        setShowAddButton(false);
+    };
 
     const openSidebar = (
         contentType: 'contexts' | 'addNewContext',
@@ -74,12 +110,7 @@ const ContentPage: React.FC = () => {
         });
     };
 
-    const removeSelection = () => {
-        document.getSelection()?.removeAllRanges();
-        setShowAddButton(false);
-    };
-
-    const sendPageData = () => {
+    const sendSelectedDataToSidebar = () => {
         removeSelection();
         chrome.runtime.sendMessage({
             action: 'scrappedPageData',
@@ -89,91 +120,24 @@ const ContentPage: React.FC = () => {
     };
 
     return (
-        <div>
+        <div className="font-inter">
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
+                contexts={contexts}
             />
             {showAddButton && (
-                <button
-                    id="btnAddToKnowledgebase"
-                    className="absolute z-50 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 py-2 px-3 flex items-center gap-x-1 font-medium"
-                    style={{
-                        left: buttonPosition.x,
-                        top: buttonPosition.y + 4,
-                    }}
-                    onClick={sendPageData}
-                >
-                    <BiPlus
-                        size={14}
-                        color="white"
-                    />
-                    <span>Add to AutoAct</span>
-                </button>
+                <AddToAutoAct
+                    buttonPosition={buttonPosition}
+                    sendSelectedDataToSidebar={sendSelectedDataToSidebar}
+                />
             )}
-            <div
-                className="buttons-wrapper fixed top-[42%] right-0 flex flex-col bg-blue-600 w-fit p-1 rounded-tl-lg rounded-bl-lg z-50"
-                title="Magic"
-            >
-                <button className="p-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800">
-                    <BiSolidMagicWand
-                        color="white"
-                        size={30}
-                    />
-                </button>
-                <button
-                    className="p-1 mt-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800"
-                    title="Run"
-                >
-                    <BiPlay
-                        color="white"
-                        size={30}
-                        onClick={() => {
-                            setIsModalOpen(true);
-                            removeSelection();
-                        }}
-                    />
-                </button>
-                <button
-                    className="p-1 mt-1 rounded-md transition-colors duration-100 ease-linear hover:bg-blue-800"
-                    onClick={() => {
-                        chrome.runtime.sendMessage(
-                            { action: 'getSidebarState' },
-                            (
-                                response:
-                                    | {
-                                          contentType:
-                                              | 'contexts'
-                                              | 'addNewContext';
-                                          isSidePanelOpen: boolean;
-                                      }
-                                    | undefined,
-                            ) => {
-                                if (response && response.isSidePanelOpen) {
-                                    if (
-                                        response.contentType === 'addNewContext'
-                                    )
-                                        openSidebar('contexts', true);
-                                    else {
-                                        chrome.runtime.sendMessage({
-                                            action: 'closeSidePanel',
-                                        });
-                                    }
-                                } else {
-                                    openSidebar('contexts', true);
-                                }
-                            },
-                        );
-                        removeSelection();
-                    }}
-                    title="Knowledgebase"
-                >
-                    <BiData
-                        color="white"
-                        size={30}
-                    />
-                </button>
-            </div>
+            <Toolbar
+                contexts={contexts}
+                openSidebar={openSidebar}
+                removeSelection={removeSelection}
+                openModal={() => setIsModalOpen(true)}
+            />
         </div>
     );
 };

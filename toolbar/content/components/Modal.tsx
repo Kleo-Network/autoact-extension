@@ -1,59 +1,102 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { BiX } from 'react-icons/bi';
-import { ContextItem } from '../../../sidebar/models/context.model';
-import Pills from './Pills';
-import SelectionBox from './SelectionBox';
+import {
+    ALL_VALUES_SELECTED,
+    MODAL_ID,
+    TOOLBAR_ID,
+} from '../../constants/common.constants';
+import { ContextItem } from '../../models/common.model';
+import MultiSelect from './MultiSelect';
 
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
+    contexts: ContextItem[];
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
-    const [selectedOption, setSelectedOption] = useState('Fill Form'),
-        [prompt, setPrompt] = useState(''),
-        [contexts, setContexts] = useState<ContextItem[]>([]),
-        [selectedContext, setSelectedContext] = useState('');
-
-    const handleSelectionChange = (option: string) => {
-        setSelectedOption(option);
-    };
-
-    const handleContextSelectionChange = (context: string) => {
-        setSelectedContext(context);
-    };
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, contexts }) => {
+    const [additionalInfo, setAdditionalInfo] = useState(''),
+        [selectedContexts, setSelectedContexts] = useState<(string | number)[]>(
+            [ALL_VALUES_SELECTED],
+        );
 
     useEffect(() => {
-        if (isOpen) {
-            chrome.runtime.sendMessage(
-                { action: 'getContexts' },
-                (response: { data: ContextItem[]; error: string | null }) => {
-                    if (response && !response.error) {
-                        setContexts(response.data);
-                        setSelectedContext(
-                            response.data.length ? response.data[0].title : '',
-                        );
-                    }
-                },
-            );
-        }
+        const handleOutsideClick = (event: MouseEvent) => {
+            const element = event.composedPath()[0] as HTMLElement;
+
+            if (
+                element.id === MODAL_ID ||
+                element.closest(`#${MODAL_ID}`) ||
+                element.id === TOOLBAR_ID ||
+                element.closest(`#${TOOLBAR_ID}`)
+            )
+                return;
+
+            onClose();
+        };
+
+        document.addEventListener('click', handleOutsideClick);
+
+        return () => document.removeEventListener('click', handleOutsideClick);
+    }, [onClose]);
+
+    useEffect(() => {
+        setSelectedContexts([ALL_VALUES_SELECTED]);
     }, [isOpen]);
+
+    const handleRunScript = () => {
+        console.log('Selected Contexts:', selectedContexts);
+        console.log('Additional Info:', additionalInfo);
+        // Make an API call
+    };
+
+    const handleSelections = useCallback(
+        (selectedId: number | string) => {
+            const isAllSelected = selectedContexts?.[0] === ALL_VALUES_SELECTED,
+                isFound = selectedContexts.includes(selectedId);
+
+            if (isAllSelected) {
+                setSelectedContexts(
+                    contexts
+                        .filter((context) => context.id !== selectedId)
+                        .map((context) => context.id),
+                );
+                return;
+            }
+
+            const updatedSelections = isFound
+                ? selectedContexts.filter(
+                      (selectedContext) => selectedContext !== selectedId,
+                  )
+                : [...selectedContexts, selectedId];
+            setSelectedContexts(
+                updatedSelections.length === contexts.length
+                    ? [ALL_VALUES_SELECTED]
+                    : updatedSelections,
+            );
+        },
+        [selectedContexts, contexts],
+    );
 
     if (!isOpen) return null;
 
     return (
         <div
-            className="modal fixed inset-0 backdrop-blur-sm w-full h-full bg-black bg-opacity-50 z-[1000] flex justify-center items-center"
-            onClick={onClose}
+            className="modal-overlay fixed inset-0 backdrop-blur-sm w-full h-full bg-black bg-opacity-50 flex justify-center items-center select-none"
+            style={{
+                zIndex: 10000,
+            }}
         >
             <div
-                className="bg-white rounded-lg w-full max-w-screen-sm flex flex-col gap-y-[18px] p-6"
-                onClick={(e) => e.stopPropagation()}
+                className="modal bg-white rounded-lg w-full max-w-screen-sm flex flex-col gap-y-[18px] p-6"
+                id={MODAL_ID}
             >
                 <div className="w-full flex items-center justify-between">
-                    <h1 className="text-2xl font-semibold">Run Action</h1>
+                    <h1 className="text-2xl font-semibold text-black">
+                        Run Action
+                    </h1>
                     <button
-                        className="rounded-full p-1 transition-colors delay-75 duration-100 ease-linear hover:bg-slate-100"
+                        className="icon-btn"
                         onClick={onClose}
                     >
                         <BiX
@@ -62,22 +105,17 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                         />
                     </button>
                 </div>
-                <div className="flex flex-col gap-y-[10px]">
-                    <p className="text-base font-medium text-gray-800">
-                        Select action to perform:
-                    </p>
-                    <Pills
-                        options={['Fill Form', 'Chat']}
-                        selectedOption={selectedOption}
-                        onSelectionChange={handleSelectionChange}
-                    />
-                </div>
-                <SelectionBox
-                    label="Select Database:"
-                    options={contexts.map((context) => context.title)}
-                    onSelectionChange={(event) =>
-                        setSelectedContext(event.target.value)
-                    }
+                <MultiSelect
+                    id="contexts"
+                    label="Select contexts from knowledgebase:"
+                    placeHolder="Select one or more contexts..."
+                    selected={selectedContexts}
+                    options={contexts.map((context) => ({
+                        id: context.id,
+                        value: context.title,
+                    }))}
+                    clearSelections={() => setSelectedContexts([])}
+                    onSelection={handleSelections}
                 />
                 <div className="flex flex-col gap-y-[10px]">
                     <label
@@ -89,12 +127,16 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                     <textarea
                         id="additionalDetails"
                         rows={2}
-                        className="w-full resize-none bg-slate-100 border border-gray-200 p-2 rounded-lg focus:outline-none focus:border-blue-600"
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
+                        className="input-box"
+                        value={additionalInfo}
+                        onChange={(e) => setAdditionalInfo(e.target.value)}
                     />
                 </div>
-                <button className="w-fit self-end text-base font-semibold bg-blue-600 text-white rounded-lg transition-colors duration-100 ease-linear px-6 py-[10px] hover:bg-blue-700">
+                <button
+                    className={`${selectedContexts.length === 0 ? 'btn-primary-disabled' : 'btn-primary'} self-end px-6`}
+                    onClick={handleRunScript}
+                    disabled={selectedContexts.length === 0}
+                >
                     Run Task
                 </button>
             </div>

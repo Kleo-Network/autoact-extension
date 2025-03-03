@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BiCaretDown, BiCheck, BiX } from 'react-icons/bi';
-import { ALL_VALUES_SELECTED } from '../constants/common.constants';
-import { MutliSelectItem } from '../models/common.model';
+import { ALL_VALUES_SELECTED } from '../../constants/common.constants';
+import { MutliSelectItem } from '../../models/common.model';
 
 interface MultiSelectProps {
     id: string;

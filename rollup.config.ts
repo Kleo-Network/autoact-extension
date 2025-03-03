@@ -21,107 +21,108 @@ const extensions = ['.js', '.jsx', '.ts', '.tsx'];
 
 // Common plugins used in multiple bundles
 const commonPlugins = [
-  resolve({
-    browser: true,
-    extensions,
-    preferBuiltins: false,
-  }),
-  commonjs(),
-  json(),
-  replace({
-    'process.env.NODE_ENV': JSON.stringify(production ? 'production' : 'development'),
-    preventAssignment: true,
-  }),
-  production && terser(),
+    resolve({
+        browser: true,
+        extensions,
+        preferBuiltins: false,
+    }),
+    commonjs(),
+    json(),
+    replace({
+        'process.env.NODE_ENV': JSON.stringify(
+            production ? 'production' : 'development',
+        ),
+        preventAssignment: true,
+    }),
+    production && terser(),
 ];
 
 // React Application (Popup or Options Page)
 const reactApp = {
-  input: 'sidebar/main.tsx', // Entry point for your React app
-  output: {
-    sourcemap: !production,
-    format: 'iife',
-    name: 'app',
-    file: 'dist/js/app.js',
-    strict: true
-  },
-  plugins: [
-    ...commonPlugins,
-    typescript({
-      tsconfig: './tsconfig.json',
-    }),
-    babel({
-      babelHelpers: 'bundled',
-      extensions,
-      exclude: 'node_modules/**',
-      presets: [
-        '@babel/preset-env',
-        '@babel/preset-react',
-        '@babel/preset-typescript',
-      ],
-    }),
-    production &&
-      visualizer({
-        filename: 'public/app.html',
-        template: 'treemap', // or 'sunburst' for different visualization
-      }),
-      postcss({
-        extract: true,
-        minimize: production,
-        plugins: [postcssImport(), tailwindcss(), autoprefixer()],
-      }),
-      svgr(),
-    copy({
-      targets: [
-        { src: 'src/logo/**/*', dest: 'dist/logo/' },
-        { src: 'src/assets/**/*', dest: 'dist/assets/' },
-        { src: 'public/**/*', dest: 'dist/' },
-        {
-          src: 'manifest.json',
-          dest: 'dist/',
-          transform: (contents) => {
-            const jsonContent = JSON.parse(contents.toString());
-            jsonContent.version = pkg.version;
-            return JSON.stringify(jsonContent, null, 2);
-          },
-        },
-      ],
-    }),
-  ],
+    input: 'sidebar/main.tsx', // Entry point for your React app
+    output: {
+        sourcemap: !production,
+        format: 'iife',
+        name: 'app',
+        file: 'dist/js/app.js',
+        strict: true,
+    },
+    plugins: [
+        ...commonPlugins,
+        typescript({
+            tsconfig: './tsconfig.json',
+        }),
+        babel({
+            babelHelpers: 'bundled',
+            extensions,
+            exclude: 'node_modules/**',
+            presets: [
+                '@babel/preset-env',
+                '@babel/preset-react',
+                '@babel/preset-typescript',
+            ],
+        }),
+        production &&
+            visualizer({
+                filename: 'public/app.html',
+                template: 'treemap', // or 'sunburst' for different visualization
+            }),
+        postcss({
+            extract: true,
+            minimize: production,
+            plugins: [postcssImport(), tailwindcss(), autoprefixer()],
+        }),
+        svgr(),
+        copy({
+            targets: [
+                { src: 'src/logo/**/*', dest: 'dist/logo/' },
+                { src: 'src/assets/**/*', dest: 'dist/assets/' },
+                { src: 'public/**/*', dest: 'dist/' },
+                {
+                    src: 'manifest.json',
+                    dest: 'dist/',
+                    transform: (contents) => {
+                        const jsonContent = JSON.parse(contents.toString());
+                        jsonContent.version = pkg.version;
+                        return JSON.stringify(jsonContent, null, 2);
+                    },
+                },
+            ],
+        }),
+    ],
 };
 
 // Background Scripts
 // Background Scripts
 const background = {
-  input: 'background/index.ts',
-  output: {
-    sourcemap: !production,
-    format: 'es',
-    name: 'background',
-    file: 'dist/background.js',
-    inlineDynamicImports: true, // Add this line
-  },
-  plugins: [
-    ...commonPlugins,
-    nodePolyfills(),
-    typescript({
-      tsconfig: './tsconfig.json',
-      include: ['background/**/*.ts'],
-    }),
-    babel({
-      babelHelpers: 'bundled',
-      extensions: ['.js', '.ts'],
-      exclude: 'node_modules/**',
-      presets: ['@babel/preset-env', '@babel/preset-typescript'],
-    }),
-    production &&
-      visualizer({
-        filename: 'public/background.html',
-        template: 'treemap',
-      }),
-  ],
+    input: 'background/index.ts',
+    output: {
+        sourcemap: !production,
+        format: 'es',
+        name: 'background',
+        file: 'dist/background.js',
+        inlineDynamicImports: true, // Add this line
+    },
+    plugins: [
+        ...commonPlugins,
+        nodePolyfills(),
+        typescript({
+            tsconfig: './tsconfig.json',
+            include: ['background/**/*.ts'],
+        }),
+        babel({
+            babelHelpers: 'bundled',
+            extensions: ['.js', '.ts'],
+            exclude: 'node_modules/**',
+            presets: ['@babel/preset-env', '@babel/preset-typescript'],
+        }),
+        production &&
+            visualizer({
+                filename: 'public/background.html',
+                template: 'treemap',
+            }),
+    ],
 };
-
 
 // Content Script
 // Previous imports remain the same...
@@ -129,37 +130,37 @@ const background = {
 const contentScript = {
     input: 'toolbar/index.ts',
     output: {
-      sourcemap: !production,
-      format: 'iife',
-      name: 'contentScript',
-      file: 'dist/contentScript.js',
+        sourcemap: !production,
+        format: 'iife',
+        name: 'contentScript',
+        file: 'dist/contentScript.js',
     },
     plugins: [
-      ...commonPlugins,
-      typescript({
-        tsconfig: './tsconfig.json',
-        include: ['toolbar/**/*.ts', 'toolbar/**/*.tsx'], // Add .tsx files
-      }),
-      babel({
-        babelHelpers: 'bundled',
-        extensions: ['.js', '.jsx', '.ts', '.tsx'], // Ensure .tsx is included
-        exclude: 'node_modules/**',
-        presets: [
-          '@babel/preset-env',
-          '@babel/preset-react',
-          '@babel/preset-typescript',
-        ],
-      }),
-      postcss({
-        plugins: [postcssImport(), tailwindcss(), autoprefixer()],
-      }),
-      production &&
-        visualizer({
-          filename: 'public/contentScript.html',
-          template: 'treemap',
+        ...commonPlugins,
+        typescript({
+            tsconfig: './tsconfig.json',
+            include: ['toolbar/**/*.ts', 'toolbar/**/*.tsx'], // Add .tsx files
         }),
+        babel({
+            babelHelpers: 'bundled',
+            extensions: ['.js', '.jsx', '.ts', '.tsx'], // Ensure .tsx is included
+            exclude: 'node_modules/**',
+            presets: [
+                '@babel/preset-env',
+                '@babel/preset-react',
+                '@babel/preset-typescript',
+            ],
+        }),
+        postcss({
+            plugins: [postcssImport(), tailwindcss(), autoprefixer()],
+        }),
+        production &&
+            visualizer({
+                filename: 'public/contentScript.html',
+                template: 'treemap',
+            }),
     ],
-  }
+};
 
 // Injected Script
 // const injectedScript = {
