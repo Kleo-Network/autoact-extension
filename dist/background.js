@@ -413,8 +413,8 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       enabled: true
     });
     chrome.sidePanel.open({
-      windowId: (sender === null || sender === void 0 || (_sender$tab = sender.tab) === null || _sender$tab === void 0 ? void 0 : _sender$tab.windowId) || 0,
-      tabId: sender === null || sender === void 0 || (_sender$tab2 = sender.tab) === null || _sender$tab2 === void 0 ? void 0 : _sender$tab2.id
+      windowId: ((_sender$tab = sender.tab) === null || _sender$tab === void 0 ? void 0 : _sender$tab.windowId) || 0,
+      tabId: (_sender$tab2 = sender.tab) === null || _sender$tab2 === void 0 ? void 0 : _sender$tab2.id
     });
   }
   if (message.action === 'closeSidePanel') {
@@ -431,6 +431,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   }
   if (message.action === 'scrappedPageData') {
     scrappedPageData = message.pageData;
+    chrome.runtime.sendMessage({
+      action: 'updatePageData'
+    });
   }
   if (message.action === 'getPageData') {
     sendResponse({
@@ -471,8 +474,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     return true;
   }
   if (message.action === 'informModalToRefetchContexts') {
-    chrome.runtime.sendMessage({
-      action: 'refetchContexts'
+    chrome.tabs.query({}, function (tabs) {
+      tabs.forEach(function (tab) {
+        chrome.tabs.sendMessage(tab.id || 0, {
+          action: 'refetchContexts'
+        });
+      });
     });
   }
 });

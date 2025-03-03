@@ -21,8 +21,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         chrome.sidePanel.setOptions({ enabled: true });
         chrome.sidePanel.open({
-            windowId: sender?.tab?.windowId || 0,
-            tabId: sender?.tab?.id,
+            windowId: sender.tab?.windowId || 0,
+            tabId: sender.tab?.id,
         });
     }
 
@@ -37,6 +37,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.action === 'scrappedPageData') {
         scrappedPageData = message.pageData;
+        chrome.runtime.sendMessage({ action: 'updatePageData' });
     }
 
     if (message.action === 'getPageData') {
@@ -56,10 +57,17 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 });
             }
         })();
+
         return true;
     }
 
     if (message.action === 'informModalToRefetchContexts') {
-        chrome.runtime.sendMessage({ action: 'refetchContexts' });
+        chrome.tabs.query({}, (tabs) => {
+            tabs.forEach((tab) => {
+                chrome.tabs.sendMessage(tab.id || 0, {
+                    action: 'refetchContexts',
+                });
+            });
+        });
     }
 });
