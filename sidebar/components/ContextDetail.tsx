@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { ContextsContext } from '../contexts/ContextsContext';
 import { ContextFormValues, ContextItem } from '../models/context.model';
-import EditContextForm from './EditContextForm';
+import ContextForm from './ContextForm';
 
 interface ContextDetailProps {
     context: ContextItem;
@@ -44,6 +44,7 @@ const ContextDetail: React.FC<ContextDetailProps> = ({
             id: context.id,
             ...contextData,
         });
+        chrome.runtime.sendMessage({ action: 'informModalToRefetchContexts' });
         onSave(contextData);
     };
 
@@ -52,24 +53,23 @@ const ContextDetail: React.FC<ContextDetailProps> = ({
     };
 
     return (
-        <div className="px-6 py-4 w-full">
+        <div className="px-6 py-4 w-full flex-1 bg-[#fafafa]">
             {!isEditMode ? (
-                <div className="w-full">
+                <div className="w-full text-black">
                     <div className="flex justify-between items-center">
                         <h1 className="text-2xl font-semibold">
                             {context.title}
                         </h1>
                     </div>
-                    <p className="text-gray-600 text-sm mt-4">
-                        {context.description}
-                    </p>
+                    <p className="text-sm mt-4">{context.description}</p>
                 </div>
             ) : (
-                <EditContextForm
+                <ContextForm
                     context={contextData}
                     onChange={handleContextDataChange}
                     onSave={handleSave}
                     onCancel={handleCancel}
+                    isEditForm={true}
                 />
             )}
         </div>
