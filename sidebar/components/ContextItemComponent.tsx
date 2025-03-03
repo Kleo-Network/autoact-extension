@@ -1,5 +1,5 @@
 import React from 'react';
-import { ContextItem } from '../models/context.model';
+import { ContextItem } from '../../src/models/context.model';
 
 interface ContextItemProps {
     item: ContextItem;

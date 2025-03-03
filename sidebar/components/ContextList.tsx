@@ -1,7 +1,7 @@
 import React from 'react';
-import Step1 from '../assets/images/step1.svg';
-import Step2 from '../assets/images/step2.svg';
-import { ContextItem } from '../models/context.model';
+import Step1 from '../../src/assets/images/step1.svg';
+import Step2 from '../../src/assets/images/step2.svg';
+import { ContextItem } from '../../src/models/context.model';
 import ContextItemComponent from './ContextItemComponent';
 
 interface ContextListProps {

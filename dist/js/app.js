@@ -27877,72 +27877,6 @@
 	    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 	};
 
-	var DefaultContext = {
-	  color: undefined,
-	  size: undefined,
-	  className: undefined,
-	  style: undefined,
-	  attr: undefined
-	};
-	var IconContext = React.createContext && /*#__PURE__*/React.createContext(DefaultContext);
-
-	var _excluded = ["attr", "size", "title"];
-	function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-	function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } } return target; }
-	function _extends$2() { _extends$2 = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
-	function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-	function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-	function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-	function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-	function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-	function Tree2Element(tree) {
-	  return tree && tree.map((node, i) => /*#__PURE__*/React.createElement(node.tag, _objectSpread({
-	    key: i
-	  }, node.attr), Tree2Element(node.child)));
-	}
-	function GenIcon(data) {
-	  return props => /*#__PURE__*/React.createElement(IconBase, _extends$2({
-	    attr: _objectSpread({}, data.attr)
-	  }, props), Tree2Element(data.child));
-	}
-	function IconBase(props) {
-	  var elem = conf => {
-	    var {
-	        attr,
-	        size,
-	        title
-	      } = props,
-	      svgProps = _objectWithoutProperties(props, _excluded);
-	    var computedSize = size || conf.size || "1em";
-	    var className;
-	    if (conf.className) className = conf.className;
-	    if (props.className) className = (className ? className + " " : "") + props.className;
-	    return /*#__PURE__*/React.createElement("svg", _extends$2({
-	      stroke: "currentColor",
-	      fill: "currentColor",
-	      strokeWidth: "0"
-	    }, conf.attr, attr, svgProps, {
-	      className: className,
-	      style: _objectSpread(_objectSpread({
-	        color: props.color || conf.color
-	      }, conf.style), props.style),
-	      height: computedSize,
-	      width: computedSize,
-	      xmlns: "http://www.w3.org/2000/svg"
-	    }), title && /*#__PURE__*/React.createElement("title", null, title), props.children);
-	  };
-	  return IconContext !== undefined ? /*#__PURE__*/React.createElement(IconContext.Consumer, null, conf => elem(conf)) : elem(DefaultContext);
-	}
-
-	// THIS FILE IS AUTO GENERATED
-	function BiArrowBack (props) {
-	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M21 11H6.414l5.293-5.293-1.414-1.414L2.586 12l7.707 7.707 1.414-1.414L6.414 13H21z"},"child":[]}]})(props);
-	}function BiPlus (props) {
-	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"},"child":[]}]})(props);
-	}function BiSolidPencil (props) {
-	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M8.707 19.707 18 10.414 13.586 6l-9.293 9.293a1.003 1.003 0 0 0-.263.464L3 21l5.242-1.03c.176-.044.337-.135.465-.263zM21 7.414a2 2 0 0 0 0-2.828L19.414 3a2 2 0 0 0-2.828 0L15 4.586 19.414 9 21 7.414z"},"child":[]}]})(props);
-	}
-
 	var DB_NAME = 'contexts_db';
 	var DB_VERSION = 1;
 
@@ -28221,6 +28155,72 @@
 	    children: children
 	  });
 	};
+
+	var DefaultContext = {
+	  color: undefined,
+	  size: undefined,
+	  className: undefined,
+	  style: undefined,
+	  attr: undefined
+	};
+	var IconContext = React.createContext && /*#__PURE__*/React.createContext(DefaultContext);
+
+	var _excluded = ["attr", "size", "title"];
+	function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+	function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } } return target; }
+	function _extends$2() { _extends$2 = Object.assign ? Object.assign.bind() : function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends$2.apply(this, arguments); }
+	function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+	function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+	function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+	function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+	function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+	function Tree2Element(tree) {
+	  return tree && tree.map((node, i) => /*#__PURE__*/React.createElement(node.tag, _objectSpread({
+	    key: i
+	  }, node.attr), Tree2Element(node.child)));
+	}
+	function GenIcon(data) {
+	  return props => /*#__PURE__*/React.createElement(IconBase, _extends$2({
+	    attr: _objectSpread({}, data.attr)
+	  }, props), Tree2Element(data.child));
+	}
+	function IconBase(props) {
+	  var elem = conf => {
+	    var {
+	        attr,
+	        size,
+	        title
+	      } = props,
+	      svgProps = _objectWithoutProperties(props, _excluded);
+	    var computedSize = size || conf.size || "1em";
+	    var className;
+	    if (conf.className) className = conf.className;
+	    if (props.className) className = (className ? className + " " : "") + props.className;
+	    return /*#__PURE__*/React.createElement("svg", _extends$2({
+	      stroke: "currentColor",
+	      fill: "currentColor",
+	      strokeWidth: "0"
+	    }, conf.attr, attr, svgProps, {
+	      className: className,
+	      style: _objectSpread(_objectSpread({
+	        color: props.color || conf.color
+	      }, conf.style), props.style),
+	      height: computedSize,
+	      width: computedSize,
+	      xmlns: "http://www.w3.org/2000/svg"
+	    }), title && /*#__PURE__*/React.createElement("title", null, title), props.children);
+	  };
+	  return IconContext !== undefined ? /*#__PURE__*/React.createElement(IconContext.Consumer, null, conf => elem(conf)) : elem(DefaultContext);
+	}
+
+	// THIS FILE IS AUTO GENERATED
+	function BiArrowBack (props) {
+	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M21 11H6.414l5.293-5.293-1.414-1.414L2.586 12l7.707 7.707 1.414-1.414L6.414 13H21z"},"child":[]}]})(props);
+	}function BiPlus (props) {
+	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"},"child":[]}]})(props);
+	}function BiSolidPencil (props) {
+	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M8.707 19.707 18 10.414 13.586 6l-9.293 9.293a1.003 1.003 0 0 0-.263.464L3 21l5.242-1.03c.176-.044.337-.135.465-.263zM21 7.414a2 2 0 0 0 0-2.828L19.414 3a2 2 0 0 0-2.828 0L15 4.586 19.414 9 21 7.414z"},"child":[]}]})(props);
+	}
 
 	var MAX_CHARACTER_LIMIT = 40000;
 

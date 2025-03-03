@@ -1,8 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import '../public/index.css';
+import { ContextsProvider } from '../src/contexts/ContextsContext';
 import App from './App';
-import { ContextsProvider } from './contexts/ContextsContext';
-import './index.css';
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>

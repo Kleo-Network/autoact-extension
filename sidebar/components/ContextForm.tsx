@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { MAX_CHARACTER_LIMIT } from '../constants/common.constants';
-import { ContextsContext } from '../contexts/ContextsContext';
-import { ContextFormValues } from '../models/context.model';
+import { MAX_CHARACTER_LIMIT } from '../../src/constants/common.constants';
+import { ContextsContext } from '../../src/contexts/ContextsContext';
+import { ContextFormValues } from '../../src/models/context.model';
 
 interface ContextFormProps {
     context: ContextFormValues;

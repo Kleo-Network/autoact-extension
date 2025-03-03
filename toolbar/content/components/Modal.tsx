@@ -4,8 +4,8 @@ import {
     ALL_VALUES_SELECTED,
     MODAL_ID,
     TOOLBAR_ID,
-} from '../../constants/common.constants';
-import { ContextItem } from '../../models/common.model';
+} from '../../../src/constants/common.constants';
+import { ContextItem } from '../../../src/models/context.model';
 import MultiSelect from './MultiSelect';
 
 interface ModalProps {

@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-    ButtonPosition,
-    ContextFormValues,
-    ContextItem,
-} from '../models/common.model';
+import { ButtonPosition } from '../../src/models/common.model';
+import { ContextFormValues, ContextItem } from '../../src/models/context.model';
 import AddToAutoAct from './components/AddToAutoAct';
 import Modal from './components/Modal';
 import Toolbar from './components/Toolbar';

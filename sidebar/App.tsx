@@ -1,10 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { BiArrowBack, BiPlus, BiSolidPencil } from 'react-icons/bi';
+import { ContextsContext } from '../src/contexts/ContextsContext';
+import { ContextFormValues, ContextItem } from '../src/models/context.model';
 import AddContextForm from './components/AddContextForm';
 import ContextDetail from './components/ContextDetail';
 import ContextList from './components/ContextList';
-import { ContextsContext } from './contexts/ContextsContext';
-import { ContextFormValues, ContextItem } from './models/context.model';
 
 const App: React.FC = () => {
     const { contexts: contextItems } = useContext(ContextsContext),
