@@ -1,6 +1,6 @@
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
-import '../public/index.css';
+import '../src/index.css';
 import ContentPage from './content/ContentPage';
 
 const root = document.createElement('div');

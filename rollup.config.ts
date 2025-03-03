@@ -77,6 +77,7 @@ const reactApp = {
             targets: [
                 { src: 'src/logo/**/*', dest: 'dist/logo/' },
                 { src: 'src/assets/**/*', dest: 'dist/assets/' },
+                { src: 'src/index.css', dest: 'dist/' },
                 { src: 'public/**/*', dest: 'dist/' },
                 {
                     src: 'manifest.json',

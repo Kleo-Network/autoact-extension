@@ -5,15 +5,12 @@
     "description": "AutoAct Chrome Extension",
     "background": {
         "service_worker": "background.js"
-      },
-    "permissions": [
-        "sidePanel",
-        "tabs"
-    ],
+    },
+    "permissions": ["sidePanel", "tabs", "activeTab", "storage"],
     "side_panel": {
         "default_path": "index.html",
         "default_title": "AutoAct"
-      },
+    },
     "content_scripts": [
         {
             "js": ["contentScript.js"],
