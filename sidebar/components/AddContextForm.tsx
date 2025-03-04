@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from 'react';
-import { ContextsContext } from '../../src/contexts/ContextsContext';
-import { ContextFormValues } from '../../src/models/context.model';
+import { ContextsContext } from '../contexts/ContextsContext';
+import { ContextFormValues } from '../models/context.model';
 import ContextForm from './ContextForm';
 
 interface AddContextFormProps {

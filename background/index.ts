@@ -1,4 +1,4 @@
-import { getAllContextsFromDB } from '../src/db/utils';
+import { getAllContextsFromDB } from '../sidebar/db/utils';
 
 let contentType = 'contexts',
     scrappedPageData = {

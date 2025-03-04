@@ -1,0 +1,1 @@
+export const MAX_CHARACTER_LIMIT = 40000;

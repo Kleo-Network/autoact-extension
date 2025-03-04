@@ -1,7 +1,7 @@
 import React from 'react';
-import { ContextItem } from '../../src/models/context.model';
 import Step1 from '../assets/images/step1.svg';
 import Step2 from '../assets/images/step2.svg';
+import { ContextItem } from '../models/context.model';
 import ContextItemComponent from './ContextItemComponent';
 
 interface ContextListProps {
@@ -23,17 +23,14 @@ const ContextList: React.FC<ContextListProps> = ({ contextItems, onView }) => {
                     </p>
                 </div>
                 <div className="step-1 w-full flex flex-col items-center gap-y-[14px]">
-                    <Step1
-                        width="40%"
-                    />
+                    <Step1 width="40%" />
                     <p className="text-sm font-medium text-gray-700">
                         Select and Add to AutoAct
                     </p>
                 </div>
                 <div className="step-2 w-full flex flex-col items-center gap-y-[14px]">
-                    <Step2 
-                        width="40%" />
-                    
+                    <Step2 width="40%" />
+
                     <p className="text-sm font-medium text-gray-700">
                         Edit and Save to Knowledgebase
                     </p>

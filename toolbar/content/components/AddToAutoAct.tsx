@@ -1,6 +1,6 @@
 import React from 'react';
 import { BiPlus } from 'react-icons/bi';
-import { ButtonPosition } from '../../../src/models/common.model';
+import { ButtonPosition } from '../../models/common.model';
 
 interface AddToAutoActProps {
     buttonPosition: ButtonPosition;
