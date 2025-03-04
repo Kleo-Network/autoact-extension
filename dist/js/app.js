@@ -28934,9 +28934,7 @@
 	        })]
 	      }), jsxRuntimeExports.jsxs("div", {
 	        className: "step-1 w-full flex flex-col items-center gap-y-[14px]",
-	        children: [jsxRuntimeExports.jsx("img", {
-	          src: SvgStep1,
-	          alt: "Select and Add to AutoAct",
+	        children: [jsxRuntimeExports.jsx(SvgStep1, {
 	          width: "40%"
 	        }), jsxRuntimeExports.jsx("p", {
 	          className: "text-sm font-medium text-gray-700",
@@ -28944,9 +28942,7 @@
 	        })]
 	      }), jsxRuntimeExports.jsxs("div", {
 	        className: "step-2 w-full flex flex-col items-center gap-y-[14px]",
-	        children: [jsxRuntimeExports.jsx("img", {
-	          src: SvgStep2,
-	          alt: "Edit and Save to Knowledgebase",
+	        children: [jsxRuntimeExports.jsx(SvgStep2, {
 	          width: "40%"
 	        }), jsxRuntimeExports.jsx("p", {
 	          className: "text-sm font-medium text-gray-700",

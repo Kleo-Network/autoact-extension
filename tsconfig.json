@@ -22,6 +22,8 @@
         "jsx": "react-jsx"
     },
     "include": [
-        "sidebar"
+        "sidebar/**/*",
+        "custom.d.ts",
+        "toolbar/**/*"
     ]
 }
