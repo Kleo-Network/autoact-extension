@@ -28399,10 +28399,23 @@
 	  });
 	};
 
-	var root = document.createElement('div');
-	root.id = '__autoact_container';
-	document.body.append(root);
-	clientExports.createRoot(root).render(/*#__PURE__*/reactExports.createElement(ContentPage));
+	var mountUI = function mountUI() {
+	  if (document.getElementById('__autoact_container')) return;
+	  var shadowHost = document.createElement('div');
+	  shadowHost.id = '__autoact_container';
+	  document.body.appendChild(shadowHost);
+	  var shadowRoot = shadowHost.attachShadow({
+	    mode: 'open'
+	  });
+	  var style = document.createElement('link');
+	  style.rel = 'stylesheet';
+	  style.href = chrome.runtime.getURL('contentScript.css');
+	  shadowRoot.appendChild(style);
+	  var app = document.createElement('div');
+	  shadowRoot.appendChild(app);
+	  clientExports.createRoot(app).render(/*#__PURE__*/reactExports.createElement(ContentPage));
+	};
+	mountUI();
 
 })();
 //# sourceMappingURL=contentScript.js.map

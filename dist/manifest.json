@@ -25,5 +25,15 @@
         "<all_urls>"
       ]
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "*.css"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
   ]
 }
