@@ -27941,6 +27941,8 @@
 	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"},"child":[]}]})(props);
 	}function BiSolidPencil (props) {
 	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M8.707 19.707 18 10.414 13.586 6l-9.293 9.293a1.003 1.003 0 0 0-.263.464L3 21l5.242-1.03c.176-.044.337-.135.465-.263zM21 7.414a2 2 0 0 0 0-2.828L19.414 3a2 2 0 0 0-2.828 0L15 4.586 19.414 9 21 7.414z"},"child":[]}]})(props);
+	}function BiSolidTrashAlt (props) {
+	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M6 7H5v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7H6zm10.618-3L15 2H9L7.382 4H3v2h18V4z"},"child":[]}]})(props);
 	}
 
 	var DB_NAME = 'contexts_db';
@@ -28056,6 +28058,34 @@
 	    });
 	  });
 	};
+	var deleteContextFromDB = function deleteContextFromDB(contextId) {
+	  return __awaiter(void 0, void 0, void 0, function () {
+	    var db, transaction, objectStore, request_4, error_4;
+	    return __generator(this, function (_a) {
+	      switch (_a.label) {
+	        case 0:
+	          _a.trys.push([0, 2,, 3]);
+	          return [4 /*yield*/, openDatabase()];
+	        case 1:
+	          db = _a.sent(), transaction = db.transaction('contexts', 'readwrite'), objectStore = transaction.objectStore('contexts'), request_4 = objectStore["delete"](contextId);
+	          return [2 /*return*/, new Promise(function (resolve, reject) {
+	            request_4.onsuccess = function () {
+	              return resolve();
+	            };
+	            request_4.onerror = function () {
+	              return reject(new Error('Error deleting context'));
+	            };
+	          })];
+	        case 2:
+	          error_4 = _a.sent();
+	          console.log('Error opening IndexedDB', error_4);
+	          throw new Error('Error opening IndexedDB');
+	        case 3:
+	          return [2 /*return*/];
+	      }
+	    });
+	  });
+	};
 
 	var ContextsContext = /*#__PURE__*/reactExports.createContext({
 	  contexts: [],
@@ -28071,6 +28101,13 @@
 	    });
 	  },
 	  updateContext: function updateContext() {
+	    return __awaiter(void 0, void 0, void 0, function () {
+	      return __generator(this, function (_a) {
+	        return [2 /*return*/];
+	      });
+	    });
+	  },
+	  deleteContext: function deleteContext() {
 	    return __awaiter(void 0, void 0, void 0, function () {
 	      return __generator(this, function (_a) {
 	        return [2 /*return*/];
@@ -28207,6 +28244,32 @@
 	      });
 	    });
 	  };
+	  var deleteContext = function deleteContext(contextId) {
+	    return __awaiter(void 0, void 0, void 0, function () {
+	      var error_4;
+	      return __generator(this, function (_a) {
+	        switch (_a.label) {
+	          case 0:
+	            _a.trys.push([0, 2,, 3]);
+	            return [4 /*yield*/, deleteContextFromDB(contextId)];
+	          case 1:
+	            _a.sent();
+	            setContexts(function (prevContexts) {
+	              return prevContexts === null || prevContexts === void 0 ? void 0 : prevContexts.filter(function (context) {
+	                return context.id !== contextId;
+	              });
+	            });
+	            return [3 /*break*/, 3];
+	          case 2:
+	            error_4 = _a.sent();
+	            console.log('Error deleting context', error_4);
+	            return [3 /*break*/, 3];
+	          case 3:
+	            return [2 /*return*/];
+	        }
+	      });
+	    });
+	  };
 	  return jsxRuntimeExports.jsx(ContextsContext.Provider, {
 	    value: {
 	      contexts: contexts,
@@ -28216,6 +28279,7 @@
 	      saveError: saveError,
 	      addNewContext: addNewContext,
 	      updateContext: updateContext,
+	      deleteContext: deleteContext,
 	      charactersCount: charactersCount
 	    },
 	    children: children
@@ -28899,14 +28963,32 @@
 	var ContextItemComponent = function ContextItemComponent(_a) {
 	  var item = _a.item,
 	    onView = _a.onView;
+	  var deleteContext = reactExports.useContext(ContextsContext).deleteContext;
 	  return jsxRuntimeExports.jsxs("div", {
 	    className: "bg-white rounded-lg text-black p-4 flex flex-col transition-all delay-75 duration-150 ease-linear hover:cursor-pointer hover:scale-105 hover:shadow-sm",
 	    onClick: function onClick() {
 	      return onView(item);
 	    },
-	    children: [jsxRuntimeExports.jsx("h1", {
-	      className: "text-base font-semibold",
-	      children: item.title
+	    children: [jsxRuntimeExports.jsxs("div", {
+	      className: "flex justify-between items-center",
+	      children: [jsxRuntimeExports.jsx("h1", {
+	        className: "text-base font-semibold",
+	        children: item.title
+	      }), jsxRuntimeExports.jsx("button", {
+	        className: "icon-btn cursor-pointer hover:bg-[#fafafa]",
+	        onClick: function onClick(event) {
+	          event.stopPropagation();
+	          deleteContext(item.id);
+	          chrome.runtime.sendMessage({
+	            action: 'informModalToRefetchContexts'
+	          });
+	        },
+	        title: "Delete",
+	        children: jsxRuntimeExports.jsx(BiSolidTrashAlt, {
+	          size: 16,
+	          color: "#2563eb"
+	        })
+	      })]
 	    }), jsxRuntimeExports.jsx("p", {
 	      className: "text-sm line-clamp-2 mt-2",
 	      children: item.description

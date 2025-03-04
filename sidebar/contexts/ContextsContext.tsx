@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import {
     addNewContextToDB,
+    deleteContextFromDB,
     getAllContextsFromDB,
     updateContextInDB,
 } from '../db/utils';
@@ -14,6 +15,7 @@ interface ContextsContextType {
     saveError: string | null;
     addNewContext: (context: ContextFormValues) => Promise<void>;
     updateContext: (updateContext: ContextItem) => Promise<void>;
+    deleteContext: (contextId: number) => Promise<void>;
     charactersCount: number;
 }
 
@@ -25,6 +27,7 @@ const ContextsContext = createContext<ContextsContextType>({
     saveError: null,
     addNewContext: async () => {},
     updateContext: async () => {},
+    deleteContext: async () => {},
     charactersCount: 0,
 });
 
@@ -108,6 +111,17 @@ const ContextsProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     };
 
+    const deleteContext = async (contextId: number) => {
+        try {
+            await deleteContextFromDB(contextId);
+            setContexts((prevContexts) =>
+                prevContexts?.filter((context) => context.id !== contextId),
+            );
+        } catch (error) {
+            console.log('Error deleting context', error);
+        }
+    };
+
     return (
         <ContextsContext.Provider
             value={{
@@ -118,6 +132,7 @@ const ContextsProvider: React.FC<{ children: React.ReactNode }> = ({
                 saveError,
                 addNewContext,
                 updateContext,
+                deleteContext,
                 charactersCount,
             }}
         >

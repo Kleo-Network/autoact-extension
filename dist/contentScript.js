@@ -28090,6 +28090,11 @@
 	  reactExports.useEffect(function () {
 	    setSelectedContexts([ALL_VALUES_SELECTED]);
 	  }, [isOpen]);
+	  reactExports.useEffect(function () {
+	    if (contexts.length === 0) {
+	      onClose();
+	    }
+	  }, [contexts]);
 	  var handleRunScript = function handleRunScript() {
 	    console.log('Selected Contexts:', selectedContexts);
 	    console.log('Additional Info:', additionalInfo);

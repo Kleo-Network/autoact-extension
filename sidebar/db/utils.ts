@@ -76,4 +76,26 @@ const updateContextInDB = async (updatedContext: ContextItem) => {
     }
 };
 
-export { addNewContextToDB, getAllContextsFromDB, updateContextInDB };
+const deleteContextFromDB = async (contextId: number) => {
+    try {
+        const db = await openDatabase(),
+            transaction = db.transaction('contexts', 'readwrite'),
+            objectStore = transaction.objectStore('contexts'),
+            request = objectStore.delete(contextId);
+
+        return new Promise<void>((resolve, reject) => {
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(new Error('Error deleting context'));
+        });
+    } catch (error) {
+        console.log('Error opening IndexedDB', error);
+        throw new Error('Error opening IndexedDB');
+    }
+};
+
+export {
+    addNewContextToDB,
+    deleteContextFromDB,
+    getAllContextsFromDB,
+    updateContextInDB,
+};

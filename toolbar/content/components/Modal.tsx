@@ -44,6 +44,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, contexts }) => {
         setSelectedContexts([ALL_VALUES_SELECTED]);
     }, [isOpen]);
 
+    useEffect(() => {
+        if (contexts.length === 0) {
+            onClose();
+        }
+    }, [contexts]);
+
     const handleRunScript = () => {
         console.log('Selected Contexts:', selectedContexts);
         console.log('Additional Info:', additionalInfo);
