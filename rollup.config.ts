@@ -153,6 +153,8 @@ const contentScript = {
             ],
         }),
         postcss({
+            extract: true,
+            minimize: production,
             plugins: [postcssImport(), tailwindcss(), autoprefixer()],
         }),
         production &&
