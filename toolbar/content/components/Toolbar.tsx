@@ -11,6 +11,7 @@ interface ToolbarProps {
     ) => void;
     removeSelection: () => void;
     openModal: () => void;
+    onMagicWandClick: () => void;
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
@@ -18,6 +19,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
     openSidebar,
     removeSelection,
     openModal,
+    onMagicWandClick
 }) => {
     const [showToolbar, setShowToolbar] = useState(false);
 
@@ -64,11 +66,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
         };
     }, []);
 
-    const handleMagicButtonClick = () => {
-        // Make an API call
-        removeSelection();
-    };
-
     const handleKnowledgebaseButtonClick = () => {
         chrome.runtime.sendMessage(
             { action: 'getSidebarState' },
@@ -108,8 +105,8 @@ const Toolbar: React.FC<ToolbarProps> = ({
         >
             <button
                 className="toolbar-btn"
-                title="Magic"
-                onClick={handleMagicButtonClick}
+                title="Magic Form Filler"
+                onClick={onMagicWandClick}
             >
                 <BiSolidMagicWand
                     color="white"

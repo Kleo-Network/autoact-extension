@@ -1,22 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { ButtonPosition } from '../models/common.model';
 import { ContextFormValues, ContextItem } from '../models/context.model';
+import { formFillerService } from '../services/formFiller';
 import AddToAutoAct from './components/AddToAutoAct';
 import Modal from './components/Modal';
 import Toolbar from './components/Toolbar';
 
+// Configuration settings for API URL - you might want to move this to a config file
+const API_BASE_URL = 'http://localhost:8000/api/v1/form';
+
 const ContentPage: React.FC = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false),
-        [showAddButton, setShowAddButton] = useState(false),
-        [buttonPosition, setButtonPosition] = useState<ButtonPosition>({
-            x: 0,
-            y: 0,
-        }),
-        [pageData, setPageData] = useState<ContextFormValues>({
-            title: '',
-            description: '',
-        }),
-        [contexts, setContexts] = useState<ContextItem[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [showAddButton, setShowAddButton] = useState(false);
+    const [buttonPosition, setButtonPosition] = useState<ButtonPosition>({
+        x: 0,
+        y: 0,
+    });
+    const [pageData, setPageData] = useState<ContextFormValues>({
+        title: '',
+        description: '',
+    });
+    const [contexts, setContexts] = useState<ContextItem[]>([]);
+
+    // Initialize the form filler service when the component mounts
+    useEffect(() => {
+        formFillerService.setApiUrl(API_BASE_URL);
+    }, []);
 
     const handleMouseUp = () => {
         const selection = window.getSelection(),
@@ -116,6 +125,11 @@ const ContentPage: React.FC = () => {
         openSidebar('addNewContext', true);
     };
 
+    const handleMagicWandClick = async () => {
+        removeSelection();
+        await formFillerService.autoFillForm(contexts);
+    };
+
     return (
         <div className="font-inter">
             <Modal
@@ -123,17 +137,20 @@ const ContentPage: React.FC = () => {
                 onClose={() => setIsModalOpen(false)}
                 contexts={contexts}
             />
+            
             {showAddButton && (
                 <AddToAutoAct
                     buttonPosition={buttonPosition}
                     sendSelectedDataToSidebar={sendSelectedDataToSidebar}
                 />
             )}
+            
             <Toolbar
                 contexts={contexts}
                 openSidebar={openSidebar}
                 removeSelection={removeSelection}
                 openModal={() => setIsModalOpen(true)}
+                onMagicWandClick={handleMagicWandClick}
             />
         </div>
     );
