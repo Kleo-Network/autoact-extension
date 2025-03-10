@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { BiData, BiPlay, BiSolidMagicWand } from 'react-icons/bi';
 import { TOOLBAR_ID } from '../../constants/common.constants';
 import { ContextItem } from '../../models/context.model';
@@ -21,50 +21,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
     openModal,
     onMagicWandClick
 }) => {
-    const [showToolbar, setShowToolbar] = useState(false);
-
-    const checkInputs = () => {
-        const inputFields = document.querySelectorAll('input, textarea');
-        setShowToolbar(inputFields.length > 3);
-    };
-
-    useEffect(() => {
-        checkInputs();
-
-        // MutationObserver for dynamically added/removed inputs
-        const observer = new MutationObserver(() => checkInputs());
-        observer.observe(document.body, { childList: true, subtree: true });
-
-        // Listen for navigation within the same website (for SPAs)
-        const handleNavigation = () => {
-            setTimeout(checkInputs, 500);
-        };
-
-        window.addEventListener('popstate', handleNavigation); // For back/forward navigation
-        window.addEventListener('hashchange', handleNavigation); // For hash-based navigation
-
-        // Handle tab switching
-        const handleVisibilityChange = () => {
-            if (!document.hidden) {
-                checkInputs();
-            }
-        };
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-
-        // Run check when a new page loads
-        window.addEventListener('load', checkInputs);
-
-        return () => {
-            observer.disconnect();
-            window.removeEventListener('popstate', handleNavigation);
-            window.removeEventListener('hashchange', handleNavigation);
-            document.removeEventListener(
-                'visibilitychange',
-                handleVisibilityChange,
-            );
-            window.removeEventListener('load', checkInputs);
-        };
-    }, []);
 
     const handleKnowledgebaseButtonClick = () => {
         chrome.runtime.sendMessage(
@@ -92,8 +48,6 @@ const Toolbar: React.FC<ToolbarProps> = ({
         );
         removeSelection();
     };
-
-    if (!showToolbar) return null;
 
     return (
         <div

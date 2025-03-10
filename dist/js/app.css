@@ -655,6 +655,12 @@ video {
   --tw-bg-opacity: 1;
   background-color: rgb(241 245 249 / var(--tw-bg-opacity, 1));
 }
+.visible {
+  visibility: visible;
+}
+.invisible {
+  visibility: hidden;
+}
 .fixed {
   position: fixed;
 }
@@ -699,6 +705,9 @@ video {
 }
 .flex {
   display: flex;
+}
+.contents {
+  display: contents;
 }
 .hidden {
   display: none;

@@ -32143,46 +32143,6 @@
 	    removeSelection = _a.removeSelection,
 	    openModal = _a.openModal,
 	    onMagicWandClick = _a.onMagicWandClick;
-	  var _b = reactExports.useState(false),
-	    showToolbar = _b[0],
-	    setShowToolbar = _b[1];
-	  var checkInputs = function checkInputs() {
-	    var inputFields = document.querySelectorAll('input, textarea');
-	    setShowToolbar(inputFields.length > 3);
-	  };
-	  reactExports.useEffect(function () {
-	    checkInputs();
-	    // MutationObserver for dynamically added/removed inputs
-	    var observer = new MutationObserver(function () {
-	      return checkInputs();
-	    });
-	    observer.observe(document.body, {
-	      childList: true,
-	      subtree: true
-	    });
-	    // Listen for navigation within the same website (for SPAs)
-	    var handleNavigation = function handleNavigation() {
-	      setTimeout(checkInputs, 500);
-	    };
-	    window.addEventListener('popstate', handleNavigation); // For back/forward navigation
-	    window.addEventListener('hashchange', handleNavigation); // For hash-based navigation
-	    // Handle tab switching
-	    var handleVisibilityChange = function handleVisibilityChange() {
-	      if (!document.hidden) {
-	        checkInputs();
-	      }
-	    };
-	    document.addEventListener('visibilitychange', handleVisibilityChange);
-	    // Run check when a new page loads
-	    window.addEventListener('load', checkInputs);
-	    return function () {
-	      observer.disconnect();
-	      window.removeEventListener('popstate', handleNavigation);
-	      window.removeEventListener('hashchange', handleNavigation);
-	      document.removeEventListener('visibilitychange', handleVisibilityChange);
-	      window.removeEventListener('load', checkInputs);
-	    };
-	  }, []);
 	  var handleKnowledgebaseButtonClick = function handleKnowledgebaseButtonClick() {
 	    chrome.runtime.sendMessage({
 	      action: 'getSidebarState'
@@ -32199,7 +32159,6 @@
 	    });
 	    removeSelection();
 	  };
-	  if (!showToolbar) return null;
 	  return jsxRuntimeExports.jsxs("div", {
 	    id: TOOLBAR_ID,
 	    className: "buttons-wrapper fixed top-[42%] right-0 flex flex-col gap-y-1 bg-blue-600 w-fit p-1 rounded-tl-lg rounded-bl-lg",
@@ -32238,8 +32197,10 @@
 	  });
 	};
 
-	// Configuration settings for API URL - you might want to move this to a config file
+	// Configuration settings for API URLs - you might want to move this to a config file
 	var API_BASE_URL = 'http://localhost:8000/api/v1/form';
+	var FORM_DETECTION_API_URL = 'http://localhost:8000/api/v1/form-detect';
+	var FALSE_POSITIVE_API_URL = 'http://localhost:8000/api/v1/form/false_positive_forms';
 	var ContentPage = function ContentPage() {
 	  var _a = reactExports.useState(false),
 	    isModalOpen = _a[0],
@@ -32262,10 +32223,312 @@
 	  var _e = reactExports.useState([]),
 	    contexts = _e[0],
 	    setContexts = _e[1];
+	  var _f = reactExports.useState(false),
+	    hasForm = _f[0],
+	    setHasForm = _f[1];
+	  var _g = reactExports.useState(0);
+	    _g[0];
+	    var setFormScore = _g[1];
 	  // Initialize the form filler service when the component mounts
 	  reactExports.useEffect(function () {
 	    formFillerService.setApiUrl(API_BASE_URL);
+	    detectForm();
+	    // Keep track of pending recalculation
+	    var recalculationTimeout = null;
+	    // Set up MutationObserver with debounce to detect DOM changes
+	    var observer = new MutationObserver(function () {
+	      // Clear any existing timeout to debounce frequent changes
+	      if (recalculationTimeout) {
+	        clearTimeout(recalculationTimeout);
+	      }
+	      // Set a new timeout to recalculate after a short delay
+	      recalculationTimeout = setTimeout(function () {
+	        return __awaiter(void 0, void 0, void 0, function () {
+	          var allHtml, windowUrl, totalScore, isFalsePositive, error_1;
+	          return __generator(this, function (_a) {
+	            switch (_a.label) {
+	              case 0:
+	                _a.trys.push([0, 5,, 6]);
+	                return [4 /*yield*/, getAllHtml()];
+	              case 1:
+	                allHtml = _a.sent();
+	                windowUrl = collectUrls().windowUrl;
+	                totalScore = calculateScoreFromHtml(allHtml);
+	                setFormScore(totalScore);
+	                if (!(totalScore >= 4)) return [3 /*break*/, 3];
+	                return [4 /*yield*/, checkFalsePositive(windowUrl)];
+	              case 2:
+	                isFalsePositive = _a.sent();
+	                setHasForm(!isFalsePositive);
+	                return [3 /*break*/, 4];
+	              case 3:
+	                setHasForm(false);
+	                _a.label = 4;
+	              case 4:
+	                return [3 /*break*/, 6];
+	              case 5:
+	                error_1 = _a.sent();
+	                console.error('Error recalculating form score:', error_1);
+	                return [3 /*break*/, 6];
+	              case 6:
+	                return [2 /*return*/];
+	            }
+	          });
+	        });
+	      }, 300); // 300ms debounce
+	    });
+	    // Observe changes to the DOM that might affect form visibility
+	    observer.observe(document.body, {
+	      childList: true,
+	      subtree: true,
+	      attributes: true,
+	      attributeFilter: ['style', 'class', 'hidden', 'display', 'visibility']
+	    });
+	    // Cleanup observer and any pending timeout on unmount
+	    return function () {
+	      observer.disconnect();
+	      if (recalculationTimeout) {
+	        clearTimeout(recalculationTimeout);
+	      }
+	    };
 	  }, []);
+	  // Function to get all HTML including cross-origin iframes content
+	  var getAllHtml = function getAllHtml() {
+	    return __awaiter(void 0, void 0, void 0, function () {
+	      var html, iframePromises, iframes, iframeContents;
+	      return __generator(this, function (_a) {
+	        switch (_a.label) {
+	          case 0:
+	            html = document.documentElement.outerHTML;
+	            iframePromises = [];
+	            iframes = document.querySelectorAll('iframe');
+	            // For each iframe, try to get its content or request it via message passing
+	            Array.from(iframes).forEach(function (iframe) {
+	              // Create a promise for each iframe
+	              var iframePromise = new Promise(function (resolve) {
+	                try {
+	                  // Try direct access first (this will work for same-origin iframes)
+	                  if (iframe.contentDocument) {
+	                    return resolve(iframe.contentDocument.documentElement.outerHTML);
+	                  }
+	                  // For cross-origin iframes, we need special handling
+	                  // Send a message to the background script to capture content
+	                  // This requires content script injection permission in manifest.json
+	                  chrome.runtime.sendMessage({
+	                    action: 'captureIframeContent',
+	                    iframeSrc: iframe.src
+	                  }, function (response) {
+	                    if (response && response.html) {
+	                      resolve(response.html);
+	                    } else {
+	                      resolve(''); // Empty string if no content available
+	                    }
+	                  });
+	                  // Set a timeout for the message response
+	                  setTimeout(function () {
+	                    return resolve('');
+	                  }, 500);
+	                } catch (e) {
+	                  console.log('Could not access iframe content:', e);
+	                  resolve('');
+	                }
+	              });
+	              iframePromises.push(iframePromise);
+	            });
+	            return [4 /*yield*/, Promise.all(iframePromises)];
+	          case 1:
+	            iframeContents = _a.sent();
+	            // Combine main document HTML with all iframe contents
+	            return [2 /*return*/, html + iframeContents.join('')];
+	        }
+	      });
+	    });
+	  };
+	  // Function to collect URLs from main window and all iframes
+	  var collectUrls = function collectUrls() {
+	    var windowUrl = window.location.href;
+	    var iframes = document.querySelectorAll('iframe');
+	    var iframeUrls = Array.from(iframes).map(function (iframe) {
+	      return iframe.src;
+	    }).filter(function (src) {
+	      return src && src.trim() !== '';
+	    });
+	    return {
+	      windowUrl: windowUrl,
+	      iframeUrls: iframeUrls
+	    };
+	  };
+	  // Function to calculate form score from HTML string
+	  var calculateScoreFromHtml = function calculateScoreFromHtml(html) {
+	    try {
+	      // Create a temporary DOM parser
+	      var parser = new DOMParser();
+	      var doc = parser.parseFromString(html, 'text/html');
+	      // Helper function to check if an element is likely visible
+	      var isLikelyVisible = function isLikelyVisible(element) {
+	        var _a, _b, _c, _d, _e, _f;
+	        // Check for common hidden attributes and CSS classes
+	        if (element.hasAttribute('hidden') || element.hasAttribute('aria-hidden') || element.hasAttribute('style') && (((_a = element.getAttribute('style')) === null || _a === void 0 ? void 0 : _a.includes('display: none')) || ((_b = element.getAttribute('style')) === null || _b === void 0 ? void 0 : _b.includes('visibility: hidden')) || ((_c = element.getAttribute('style')) === null || _c === void 0 ? void 0 : _c.includes('opacity: 0'))) || element.classList.contains('hidden') || element.classList.contains('invisible')) {
+	          return false;
+	        }
+	        // Check if any parent is hidden
+	        var parent = element.parentElement;
+	        while (parent) {
+	          if (parent.hasAttribute('hidden') || parent.hasAttribute('aria-hidden') || parent.hasAttribute('style') && (((_d = parent.getAttribute('style')) === null || _d === void 0 ? void 0 : _d.includes('display: none')) || ((_e = parent.getAttribute('style')) === null || _e === void 0 ? void 0 : _e.includes('visibility: hidden')) || ((_f = parent.getAttribute('style')) === null || _f === void 0 ? void 0 : _f.includes('opacity: 0'))) || parent.classList.contains('hidden') || parent.classList.contains('invisible')) {
+	            return false;
+	          }
+	          parent = parent.parentElement;
+	        }
+	        return true;
+	      };
+	      // Count form elements that are likely visible
+	      var inputs = Array.from(doc.querySelectorAll('input')).filter(isLikelyVisible);
+	      var textareas = Array.from(doc.querySelectorAll('textarea')).filter(isLikelyVisible);
+	      var selects = Array.from(doc.querySelectorAll('select')).filter(isLikelyVisible);
+	      var radioButtons = inputs.filter(function (input) {
+	        return input.type === 'radio';
+	      });
+	      var checkboxes = inputs.filter(function (input) {
+	        return input.type === 'checkbox';
+	      });
+	      var otherInputs = inputs.filter(function (input) {
+	        return input.type !== 'radio' && input.type !== 'checkbox';
+	      });
+	      // Calculate score according to scoring system
+	      var score = otherInputs.length * 1 +
+	      // Regular inputs: 1 point each
+	      textareas.length * 3 +
+	      // Textareas: 3 points each
+	      selects.length * 2 +
+	      // Selects: 2 points each
+	      radioButtons.length * 3 +
+	      // Radio buttons: 3 points each
+	      checkboxes.length * 3; // Checkboxes: 3 points each
+	      return score;
+	    } catch (e) {
+	      console.error('Error calculating score from HTML:', e);
+	      return 0;
+	    }
+	  };
+	  // Function to check if current URL is a false positive
+	  var checkFalsePositive = function checkFalsePositive(windowUrl) {
+	    return __awaiter(void 0, void 0, void 0, function () {
+	      var response, data, error_2;
+	      return __generator(this, function (_a) {
+	        switch (_a.label) {
+	          case 0:
+	            _a.trys.push([0, 3,, 4]);
+	            return [4 /*yield*/, fetch(FALSE_POSITIVE_API_URL, {
+	              method: 'POST',
+	              headers: {
+	                'Content-Type': 'application/json'
+	              },
+	              body: JSON.stringify({
+	                url: windowUrl
+	              })
+	            })];
+	          case 1:
+	            response = _a.sent();
+	            return [4 /*yield*/, response.json()];
+	          case 2:
+	            data = _a.sent();
+	            // If the API says it's a false positive (form: false), return true
+	            return [2 /*return*/, data.form === false];
+	          case 3:
+	            error_2 = _a.sent();
+	            console.error('Error checking false positive:', error_2);
+	            return [2 /*return*/, false];
+	          // If API fails, assume it's not a false positive
+	          case 4:
+	            return [2 /*return*/];
+	        }
+	      });
+	    });
+	  };
+	  // Function to detect if the page contains a form
+	  var detectForm = function detectForm() {
+	    return __awaiter(void 0, void 0, void 0, function () {
+	      var allHtml, _a, windowUrl, iframeUrls, response, data, totalScore, isFalsePositive, error_3, allHtml, windowUrl, totalScore, isFalsePositive, scoreError_1;
+	      return __generator(this, function (_b) {
+	        switch (_b.label) {
+	          case 0:
+	            _b.trys.push([0, 7,, 15]);
+	            return [4 /*yield*/, getAllHtml()];
+	          case 1:
+	            allHtml = _b.sent();
+	            _a = collectUrls(), windowUrl = _a.windowUrl, iframeUrls = _a.iframeUrls;
+	            return [4 /*yield*/, fetch(FORM_DETECTION_API_URL, {
+	              method: 'POST',
+	              headers: {
+	                'Content-Type': 'application/json'
+	              },
+	              body: JSON.stringify({
+	                html: allHtml,
+	                windowUrl: windowUrl,
+	                iframeUrls: iframeUrls
+	              })
+	            })];
+	          case 2:
+	            response = _b.sent();
+	            return [4 /*yield*/, response.json()];
+	          case 3:
+	            data = _b.sent();
+	            // If API returns true, display the toolbar
+	            if (data.form === true) {
+	              setHasForm(true);
+	              return [2 /*return*/];
+	            }
+	            totalScore = calculateScoreFromHtml(allHtml);
+	            setFormScore(totalScore);
+	            if (!(totalScore >= 4)) return [3 /*break*/, 5];
+	            return [4 /*yield*/, checkFalsePositive(windowUrl)];
+	          case 4:
+	            isFalsePositive = _b.sent();
+	            // Only show toolbar if it's not a false positive
+	            setHasForm(!isFalsePositive);
+	            return [3 /*break*/, 6];
+	          case 5:
+	            // Score not high enough to show toolbar
+	            setHasForm(false);
+	            _b.label = 6;
+	          case 6:
+	            return [3 /*break*/, 15];
+	          case 7:
+	            error_3 = _b.sent();
+	            console.error('Error detecting form:', error_3);
+	            _b.label = 8;
+	          case 8:
+	            _b.trys.push([8, 13,, 14]);
+	            return [4 /*yield*/, getAllHtml()];
+	          case 9:
+	            allHtml = _b.sent();
+	            windowUrl = collectUrls().windowUrl;
+	            totalScore = calculateScoreFromHtml(allHtml);
+	            setFormScore(totalScore);
+	            if (!(totalScore >= 4)) return [3 /*break*/, 11];
+	            return [4 /*yield*/, checkFalsePositive(windowUrl)];
+	          case 10:
+	            isFalsePositive = _b.sent();
+	            setHasForm(!isFalsePositive);
+	            return [3 /*break*/, 12];
+	          case 11:
+	            setHasForm(false);
+	            _b.label = 12;
+	          case 12:
+	            return [3 /*break*/, 14];
+	          case 13:
+	            scoreError_1 = _b.sent();
+	            console.error('Error calculating form score:', scoreError_1);
+	            setHasForm(false);
+	            return [3 /*break*/, 14];
+	          case 14:
+	            return [3 /*break*/, 15];
+	          case 15:
+	            return [2 /*return*/];
+	        }
+	      });
+	    });
+	  };
 	  var handleMouseUp = function handleMouseUp() {
 	    var selection = window.getSelection(),
 	      selectedText = (selection === null || selection === void 0 ? void 0 : selection.toString().trim()) || '';
@@ -32369,7 +32632,7 @@
 	    }), showAddButton && jsxRuntimeExports.jsx(AddToAutoAct, {
 	      buttonPosition: buttonPosition,
 	      sendSelectedDataToSidebar: sendSelectedDataToSidebar
-	    }), jsxRuntimeExports.jsx(Toolbar, {
+	    }), hasForm && jsxRuntimeExports.jsx(Toolbar, {
 	      contexts: contexts,
 	      openSidebar: openSidebar,
 	      removeSelection: removeSelection,

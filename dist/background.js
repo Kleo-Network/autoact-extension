@@ -440,6 +440,43 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
       pageData: scrappedPageData
     });
   }
+  if (message.action === 'captureIframeContent') {
+    // Handle cross-origin iframe content capture
+    var iframeSrc = message.iframeSrc;
+    if (!iframeSrc) {
+      sendResponse({
+        html: ''
+      });
+      return;
+    }
+
+    // Execute a content script in the iframe to capture its HTML
+    // This requires "all_frames": true in manifest.json content scripts
+    try {
+      var _sender$tab3;
+      chrome.tabs.executeScript(((_sender$tab3 = sender.tab) === null || _sender$tab3 === void 0 ? void 0 : _sender$tab3.id) || 0, {
+        code: "\n                        Array.from(document.querySelectorAll('iframe'))\n                            .filter(iframe => iframe.src === \"".concat(iframeSrc, "\")\n                            .map(iframe => {\n                                try {\n                                    return iframe.contentDocument?.documentElement.outerHTML || '';\n                                } catch (e) {\n                                    return '';\n                                }\n                            })[0] || '';\n                    "),
+        allFrames: true
+      }, function (results) {
+        // If we got a result, send it back
+        if (results && results.length > 0) {
+          sendResponse({
+            html: results[0] || ''
+          });
+        } else {
+          sendResponse({
+            html: ''
+          });
+        }
+      });
+      return true; // Keep the message channel open for the async response
+    } catch (error) {
+      console.error('Error executing script in iframe:', error);
+      sendResponse({
+        html: ''
+      });
+    }
+  }
   if (message.action === 'getContexts') {
     _asyncToGenerator(/*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
       var contexts;
