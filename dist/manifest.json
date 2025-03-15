@@ -11,7 +11,8 @@
     "tabs",
     "activeTab",
     "storage",
-    "scripting"
+    "scripting",
+    "contextMenus"
   ],
   "side_panel": {
     "default_path": "index.html",

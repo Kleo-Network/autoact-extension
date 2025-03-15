@@ -7,6 +7,57 @@ let contentType = 'contexts',
     },
     isSidePanelOpen = false;
 
+// Create the context menu item when the extension is installed
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.contextMenus.create({
+        id: 'addToAutoAct',
+        title: 'Add to AutoAct',
+        contexts: ['selection']
+    });
+});
+
+// Handle context menu click
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === 'addToAutoAct' && info.selectionText) {
+        // Get the selected text and page title
+        const selectedText = info.selectionText;
+        
+        // Get the tab title for the current tab
+        chrome.tabs.get(tab?.id || 0, (currentTab) => {
+            const pageTitle = currentTab.title || '';
+            
+            // Create the page data object
+            const pageData = {
+                title: pageTitle,
+                description: selectedText
+            };
+            
+            // Save the selected data
+            scrappedPageData = pageData;
+            
+            // Notify that new data is available
+            chrome.runtime.sendMessage({ action: 'updatePageData' });
+            
+            // Open the sidebar with the addNewContext view
+            if (tab?.id) {
+                contentType = 'addNewContext';
+                isSidePanelOpen = true;
+                
+                chrome.runtime.sendMessage({
+                    action: 'updateSidebarContentType',
+                    contentType,
+                });
+                
+                chrome.sidePanel.setOptions({ enabled: true });
+                chrome.sidePanel.open({
+                    windowId: tab.windowId,
+                    tabId: tab.id
+                });
+            }
+        });
+    }
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'openSidePanel') {
         contentType = message.contentType;

@@ -2,10 +2,18 @@
 import axios from 'axios';
 import { ContextItem } from '../models/context.model';
 
-interface FormResponse {
+// Individual form field response
+interface FormFieldResponse {
     querySelectorInput: string;
     label: string;
     value: string;
+}
+
+// New API response format
+interface ApiResponse {
+    type: 'direct' | 'enter';
+    domain: string;
+    fillJSON: FormFieldResponse[];
 }
 
 class FormFillerService {
@@ -46,6 +54,117 @@ class FormFillerService {
     }
     
     /**
+     * Sleep/wait function for sequential form filling
+     */
+    private sleep(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    /**
+     * Simulates pressing Enter on an input element
+     */
+    private triggerEnterKey(element: HTMLElement): void {
+        // Create and dispatch a keyboard event for the Enter key
+        const enterEvent = new KeyboardEvent('keydown', {
+            key: 'Enter',
+            code: 'Enter',
+            keyCode: 13,
+            which: 13,
+            bubbles: true,
+            cancelable: true
+        });
+        
+        element.dispatchEvent(enterEvent);
+        
+        // Also trigger form submission in case the form listens for that
+        const form = element.closest('form');
+        if (form) {
+            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+            form.dispatchEvent(submitEvent);
+        }
+    }
+    
+    /**
+     * Fill a single form element and return success status
+     */
+    private fillFormElement(element: FormFieldResponse): boolean {
+        try {
+            const input = document.querySelector(element.querySelectorInput);
+            if (!input) return false;
+            
+            // Handle different input types
+            if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
+                input.value = element.value;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                return true;
+            } else if (input instanceof HTMLSelectElement) {
+                const options = Array.from(input.options);
+                const option = options.find(opt => 
+                    opt.text.toLowerCase().includes(element.value.toLowerCase()) || 
+                    opt.value.toLowerCase().includes(element.value.toLowerCase())
+                );
+                
+                if (option) {
+                    input.value = option.value;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    return true;
+                }
+            }
+            return false;
+        } catch (err) {
+            console.error(`Error filling element ${element.querySelectorInput}:`, err);
+            return false;
+        }
+    }
+    
+    /**
+     * Fill form elements in "direct" mode (all at once)
+     */
+    private fillDirectMode(formElements: FormFieldResponse[]): number {
+        let filledCount = 0;
+        
+        formElements.forEach(element => {
+            const success = this.fillFormElement(element);
+            if (success) filledCount++;
+        });
+        
+        return filledCount;
+    }
+    
+    /**
+     * Fill form elements in "enter" mode (one by one with Enter key)
+     */
+    private async fillEnterMode(formElements: FormFieldResponse[]): Promise<number> {
+        let filledCount = 0;
+        
+        for (const element of formElements) {
+            try {
+                // Fill the form element
+                const success = this.fillFormElement(element);
+                
+                if (success) {
+                    filledCount++;
+                    
+                    // Get the element reference
+                    const input = document.querySelector(element.querySelectorInput);
+                    if (input instanceof HTMLElement) {
+                        // Trigger Enter key
+                        this.triggerEnterKey(input);
+                        
+                        // Wait for the form to process
+                        await this.sleep(1000);
+                    }
+                }
+            } catch (error) {
+                console.error(`Error in sequential form filling for ${element.querySelectorInput}:`, error);
+            }
+        }
+        
+        return filledCount;
+    }
+    
+    /**
      * Fill the form on the current page automatically
      * Uses a generic prompt to ask the AI to fill the form with appropriate information
      * @param contexts The knowledge base contexts to include in the prompt
@@ -79,7 +198,7 @@ class FormFillerService {
             console.log('Including contexts:', contexts.length > 0 ? 'Yes' : 'No');
             
             // Call the API
-            const response = await axios.post<FormResponse[]>(
+            const response = await axios.post<ApiResponse>(
                 `${this.apiBaseUrl}/${domain}`, 
                 formData,
                 {
@@ -90,50 +209,33 @@ class FormFillerService {
                 }
             );
             
-            // Hide loading indicator
-            this.hideLoadingIndicator();
-            
-            // Check if we got valid form elements
-            if (!response.data || response.data.length === 0) {
+            // Check if we got valid response
+            if (!response.data || !response.data.fillJSON || response.data.fillJSON.length === 0) {
+                this.hideLoadingIndicator();
+                console.log('response from API', !response.data)
                 console.error('No form elements returned from API');
                 this.showMessage('No form elements detected', 'error');
                 return false;
             }
             
-            // Fill each form element
-            const formElements = response.data;
+            const { type, fillJSON: formElements } = response.data;
             let filledCount = 0;
             
-            formElements.forEach(element => {
-                try {
-                    const input = document.querySelector(element.querySelectorInput);
-                    if (input) {
-                        // Handle different input types
-                        if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
-                            input.value = element.value;
-                            input.dispatchEvent(new Event('input', { bubbles: true }));
-                            input.dispatchEvent(new Event('change', { bubbles: true }));
-                            filledCount++;
-                        } else if (input instanceof HTMLSelectElement) {
-                            const options = Array.from(input.options);
-                            const option = options.find(opt => 
-                                opt.text.toLowerCase().includes(element.value.toLowerCase()) || 
-                                opt.value.toLowerCase().includes(element.value.toLowerCase())
-                            );
-                            
-                            if (option) {
-                                input.value = option.value;
-                                input.dispatchEvent(new Event('change', { bubbles: true }));
-                                filledCount++;
-                            }
-                        }
-                    }
-                } catch (err) {
-                    console.error(`Error filling element ${element.querySelectorInput}:`, err);
-                }
-            });
+            // Handle different form filling modes
+            if (type === 'enter') {
+                // Sequential filling with Enter key
+                console.log('Using sequential "enter" mode for form filling');
+                filledCount = await this.fillEnterMode(formElements);
+            } else {
+                // Default direct mode - fill all at once
+                console.log('Using direct mode for form filling');
+                filledCount = this.fillDirectMode(formElements);
+            }
             
-            console.log(`Filled ${filledCount} of ${formElements.length} form elements`);
+            // Hide loading indicator
+            this.hideLoadingIndicator();
+            
+            console.log(`Filled ${filledCount} of ${formElements.length} form elements using ${type} mode`);
             
             if (filledCount > 0) {
                 this.showMessage(`Successfully filled ${filledCount} form fields!`, 'success');

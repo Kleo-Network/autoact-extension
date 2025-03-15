@@ -1,23 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { ButtonPosition } from '../models/common.model';
 import { ContextFormValues, ContextItem } from '../models/context.model';
 import { formFillerService } from '../services/formFiller';
-import AddToAutoAct from './components/AddToAutoAct';
 import Modal from './components/Modal';
 import Toolbar from './components/Toolbar';
+import { 
+    FORM_PROVIDER_URL_PATTERNS, 
+    FORM_PROVIDER_DOM_PATTERNS, 
+    FORM_PROVIDER_SELECTORS 
+} from '../constants/form-providers';
 
 // Configuration settings for API URLs - you might want to move this to a config file
 const API_BASE_URL = 'http://localhost:8000/api/v1/form';
-const FORM_DETECTION_API_URL = 'http://localhost:8000/api/v1/form-detect';
-const FALSE_POSITIVE_API_URL = 'http://localhost:8000/api/v1/form/false_positive_forms';
+const FORM_DETECTION_API_URL = 'http://localhost:8000/api/v1/form/form-detect';
+const FALSE_POSITIVE_API_URL = 'http://localhost:8000/api/v1/detect/false_positive_forms';
 
 const ContentPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [showAddButton, setShowAddButton] = useState(false);
-    const [buttonPosition, setButtonPosition] = useState<ButtonPosition>({
-        x: 0,
-        y: 0,
-    });
     const [pageData, setPageData] = useState<ContextFormValues>({
         title: '',
         description: '',
@@ -153,6 +151,45 @@ const ContentPage: React.FC = () => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             
+            // Check for known form provider URL patterns
+            const currentUrl = window.location.href;
+            // Check current window URL against known patterns
+            for (const pattern of FORM_PROVIDER_URL_PATTERNS) {
+                if (currentUrl.startsWith(pattern)) {
+                    console.log(`Detected known form provider URL: ${pattern}`);
+                    return 10; // High enough score to show toolbar
+                }
+            }
+            
+            // Check iframe URLs
+            const iframes = Array.from(document.querySelectorAll('iframe'));
+            for (const iframe of iframes) {
+                if (iframe.src) {
+                    for (const pattern of FORM_PROVIDER_URL_PATTERNS) {
+                        if (iframe.src.startsWith(pattern)) {
+                            console.log(`Detected known form provider URL in iframe: ${pattern}`);
+                            return 10; // High enough score to show toolbar
+                        }
+                    }
+                }
+            }
+            
+            // Check for known DOM patterns in HTML content
+            for (const pattern of FORM_PROVIDER_DOM_PATTERNS) {
+                if (pattern.test(html)) {
+                    console.log(`Detected known form provider DOM pattern: ${pattern}`);
+                    return 10; // High enough score to show toolbar
+                }
+            }
+            
+            // Check for known CSS selectors
+            for (const selector of FORM_PROVIDER_SELECTORS) {
+                if (doc.querySelectorAll(selector).length > 0) {
+                    console.log(`Detected known form provider selector: ${selector}`);
+                    return 10; // High enough score to show toolbar
+                }
+            }
+            
             // Helper function to check if an element is likely visible
             const isLikelyVisible = (element: Element): boolean => {
                 // Check for common hidden attributes and CSS classes
@@ -232,7 +269,7 @@ const ContentPage: React.FC = () => {
             return data.form === false;
         } catch (error) {
             console.error('Error checking false positive:', error);
-            return false; // If API fails, assume it's not a false positive
+            return true; // If API fails, assume it's not a false positive
         }
     };
 
@@ -304,46 +341,7 @@ const ContentPage: React.FC = () => {
         }
     };
 
-    const handleMouseUp = () => {
-        const selection = window.getSelection(),
-            selectedText = selection?.toString().trim() || '';
-
-        if (selectedText?.length !== 0 && selection?.rangeCount) {
-            setShowAddButton(false);
-            setPageData({
-                title: document.title,
-                description: selectedText,
-            });
-
-            const range = selection.getRangeAt(0),
-                rect = range.getBoundingClientRect();
-            setButtonPosition({
-                x: rect.left + window.scrollX,
-                y: rect.bottom + window.scrollY,
-            });
-
-            setShowAddButton(true);
-        }
-    };
-
-    const handleMouseDown = (event: MouseEvent) => {
-        const element = event.composedPath()[0] as HTMLElement;
-
-        if (
-            element.id === 'btnAddToKnowledgebase' ||
-            element.closest('#btnAddToKnowledgebase')
-        )
-            return;
-
-        setShowAddButton(false);
-    };
-
-    const handleClick = () => {
-        setTimeout(() => {
-            const selection = window.getSelection()?.toString().trim();
-            if (!selection) setShowAddButton(false);
-        }, 0);
-    };
+    // Context menu functionality is now handled in the background script
 
     const fetchContexts = () => {
         chrome.runtime.sendMessage(
@@ -364,22 +362,13 @@ const ContentPage: React.FC = () => {
         fetchContexts();
         chrome.runtime.onMessage.addListener(handleRefetchContexts);
 
-        document.addEventListener('mouseup', handleMouseUp);
-        document.addEventListener('mousedown', handleMouseDown);
-        document.addEventListener('click', handleClick);
-
         return () => {
             chrome.runtime.onMessage.removeListener(handleRefetchContexts);
-
-            document.removeEventListener('mouseup', handleMouseUp);
-            document.removeEventListener('mousedown', handleMouseDown);
-            document.removeEventListener('click', handleClick);
         };
     }, []);
 
     const removeSelection = () => {
         document.getSelection()?.removeAllRanges();
-        setShowAddButton(false);
     };
 
     const openSidebar = (
@@ -414,13 +403,6 @@ const ContentPage: React.FC = () => {
                 onClose={() => setIsModalOpen(false)}
                 contexts={contexts}
             />
-            
-            {showAddButton && (
-                <AddToAutoAct
-                    buttonPosition={buttonPosition}
-                    sendSelectedDataToSidebar={sendSelectedDataToSidebar}
-                />
-            )}
             
             {hasForm && (
                 <Toolbar

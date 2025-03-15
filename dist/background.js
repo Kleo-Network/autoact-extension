@@ -398,6 +398,59 @@ var contentType = 'contexts',
     description: ''
   },
   isSidePanelOpen = false;
+
+// Create the context menu item when the extension is installed
+chrome.runtime.onInstalled.addListener(function () {
+  chrome.contextMenus.create({
+    id: 'addToAutoAct',
+    title: 'Add to AutoAct',
+    contexts: ['selection']
+  });
+});
+
+// Handle context menu click
+chrome.contextMenus.onClicked.addListener(function (info, tab) {
+  if (info.menuItemId === 'addToAutoAct' && info.selectionText) {
+    // Get the selected text and page title
+    var selectedText = info.selectionText;
+
+    // Get the tab title for the current tab
+    chrome.tabs.get((tab === null || tab === void 0 ? void 0 : tab.id) || 0, function (currentTab) {
+      var pageTitle = currentTab.title || '';
+
+      // Create the page data object
+      var pageData = {
+        title: pageTitle,
+        description: selectedText
+      };
+
+      // Save the selected data
+      scrappedPageData = pageData;
+
+      // Notify that new data is available
+      chrome.runtime.sendMessage({
+        action: 'updatePageData'
+      });
+
+      // Open the sidebar with the addNewContext view
+      if (tab !== null && tab !== void 0 && tab.id) {
+        contentType = 'addNewContext';
+        isSidePanelOpen = true;
+        chrome.runtime.sendMessage({
+          action: 'updateSidebarContentType',
+          contentType: contentType
+        });
+        chrome.sidePanel.setOptions({
+          enabled: true
+        });
+        chrome.sidePanel.open({
+          windowId: tab.windowId,
+          tabId: tab.id
+        });
+      }
+    });
+  }
+});
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === 'openSidePanel') {
     var _sender$tab, _sender$tab2;

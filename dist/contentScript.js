@@ -31620,18 +31620,144 @@
 	    }).join("\n\n");
 	  };
 	  /**
+	   * Sleep/wait function for sequential form filling
+	   */
+	  FormFillerService.prototype.sleep = function (ms) {
+	    return new Promise(function (resolve) {
+	      return setTimeout(resolve, ms);
+	    });
+	  };
+	  /**
+	   * Simulates pressing Enter on an input element
+	   */
+	  FormFillerService.prototype.triggerEnterKey = function (element) {
+	    // Create and dispatch a keyboard event for the Enter key
+	    var enterEvent = new KeyboardEvent('keydown', {
+	      key: 'Enter',
+	      code: 'Enter',
+	      keyCode: 13,
+	      which: 13,
+	      bubbles: true,
+	      cancelable: true
+	    });
+	    element.dispatchEvent(enterEvent);
+	    // Also trigger form submission in case the form listens for that
+	    var form = element.closest('form');
+	    if (form) {
+	      var submitEvent = new Event('submit', {
+	        bubbles: true,
+	        cancelable: true
+	      });
+	      form.dispatchEvent(submitEvent);
+	    }
+	  };
+	  /**
+	   * Fill a single form element and return success status
+	   */
+	  FormFillerService.prototype.fillFormElement = function (element) {
+	    try {
+	      var input = document.querySelector(element.querySelectorInput);
+	      if (!input) return false;
+	      // Handle different input types
+	      if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
+	        input.value = element.value;
+	        input.dispatchEvent(new Event('input', {
+	          bubbles: true
+	        }));
+	        input.dispatchEvent(new Event('change', {
+	          bubbles: true
+	        }));
+	        return true;
+	      } else if (input instanceof HTMLSelectElement) {
+	        var options = Array.from(input.options);
+	        var option = options.find(function (opt) {
+	          return opt.text.toLowerCase().includes(element.value.toLowerCase()) || opt.value.toLowerCase().includes(element.value.toLowerCase());
+	        });
+	        if (option) {
+	          input.value = option.value;
+	          input.dispatchEvent(new Event('change', {
+	            bubbles: true
+	          }));
+	          return true;
+	        }
+	      }
+	      return false;
+	    } catch (err) {
+	      console.error("Error filling element ".concat(element.querySelectorInput, ":"), err);
+	      return false;
+	    }
+	  };
+	  /**
+	   * Fill form elements in "direct" mode (all at once)
+	   */
+	  FormFillerService.prototype.fillDirectMode = function (formElements) {
+	    var _this = this;
+	    var filledCount = 0;
+	    formElements.forEach(function (element) {
+	      var success = _this.fillFormElement(element);
+	      if (success) filledCount++;
+	    });
+	    return filledCount;
+	  };
+	  /**
+	   * Fill form elements in "enter" mode (one by one with Enter key)
+	   */
+	  FormFillerService.prototype.fillEnterMode = function (formElements) {
+	    return __awaiter(this, void 0, void 0, function () {
+	      var filledCount, _i, formElements_1, element, success, input, error_1;
+	      return __generator(this, function (_a) {
+	        switch (_a.label) {
+	          case 0:
+	            filledCount = 0;
+	            _i = 0, formElements_1 = formElements;
+	            _a.label = 1;
+	          case 1:
+	            if (!(_i < formElements_1.length)) return [3 /*break*/, 7];
+	            element = formElements_1[_i];
+	            _a.label = 2;
+	          case 2:
+	            _a.trys.push([2, 5,, 6]);
+	            success = this.fillFormElement(element);
+	            if (!success) return [3 /*break*/, 4];
+	            filledCount++;
+	            input = document.querySelector(element.querySelectorInput);
+	            if (!(input instanceof HTMLElement)) return [3 /*break*/, 4];
+	            // Trigger Enter key
+	            this.triggerEnterKey(input);
+	            // Wait for the form to process
+	            return [4 /*yield*/, this.sleep(1000)];
+	          case 3:
+	            // Wait for the form to process
+	            _a.sent();
+	            _a.label = 4;
+	          case 4:
+	            return [3 /*break*/, 6];
+	          case 5:
+	            error_1 = _a.sent();
+	            console.error("Error in sequential form filling for ".concat(element.querySelectorInput, ":"), error_1);
+	            return [3 /*break*/, 6];
+	          case 6:
+	            _i++;
+	            return [3 /*break*/, 1];
+	          case 7:
+	            return [2 /*return*/, filledCount];
+	        }
+	      });
+	    });
+	  };
+	  /**
 	   * Fill the form on the current page automatically
 	   * Uses a generic prompt to ask the AI to fill the form with appropriate information
 	   * @param contexts The knowledge base contexts to include in the prompt
 	   */
 	  FormFillerService.prototype.autoFillForm = function (contexts) {
 	    return __awaiter(this, void 0, void 0, function () {
-	      var domain, dom, contextsText, userPrompt, formData, response, formElements, filledCount_1, error_1;
-	      var _a, _b;
-	      return __generator(this, function (_c) {
-	        switch (_c.label) {
+	      var domain, dom, contextsText, userPrompt, formData, response, _a, type, formElements, filledCount, error_2;
+	      var _b, _c;
+	      return __generator(this, function (_d) {
+	        switch (_d.label) {
 	          case 0:
-	            _c.trys.push([0, 2,, 3]);
+	            _d.trys.push([0, 5,, 6]);
 	            // Show loading indicator
 	            this.showLoadingIndicator();
 	            domain = this.getDomain();
@@ -31655,68 +31781,50 @@
 	              }
 	            })];
 	          case 1:
-	            response = _c.sent();
-	            // Hide loading indicator
-	            this.hideLoadingIndicator();
-	            // Check if we got valid form elements
-	            if (!response.data || response.data.length === 0) {
+	            response = _d.sent();
+	            // Check if we got valid response
+	            if (!response.data || !response.data.fillJSON || response.data.fillJSON.length === 0) {
+	              this.hideLoadingIndicator();
 	              console.error('No form elements returned from API');
 	              this.showMessage('No form elements detected', 'error');
 	              return [2 /*return*/, false];
 	            }
-	            formElements = response.data;
-	            filledCount_1 = 0;
-	            formElements.forEach(function (element) {
-	              try {
-	                var input = document.querySelector(element.querySelectorInput);
-	                if (input) {
-	                  // Handle different input types
-	                  if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
-	                    input.value = element.value;
-	                    input.dispatchEvent(new Event('input', {
-	                      bubbles: true
-	                    }));
-	                    input.dispatchEvent(new Event('change', {
-	                      bubbles: true
-	                    }));
-	                    filledCount_1++;
-	                  } else if (input instanceof HTMLSelectElement) {
-	                    var options = Array.from(input.options);
-	                    var option = options.find(function (opt) {
-	                      return opt.text.toLowerCase().includes(element.value.toLowerCase()) || opt.value.toLowerCase().includes(element.value.toLowerCase());
-	                    });
-	                    if (option) {
-	                      input.value = option.value;
-	                      input.dispatchEvent(new Event('change', {
-	                        bubbles: true
-	                      }));
-	                      filledCount_1++;
-	                    }
-	                  }
-	                }
-	              } catch (err) {
-	                console.error("Error filling element ".concat(element.querySelectorInput, ":"), err);
-	              }
-	            });
-	            console.log("Filled ".concat(filledCount_1, " of ").concat(formElements.length, " form elements"));
-	            if (filledCount_1 > 0) {
-	              this.showMessage("Successfully filled ".concat(filledCount_1, " form fields!"), 'success');
+	            _a = response.data, type = _a.type, formElements = _a.fillJSON;
+	            filledCount = 0;
+	            if (!(type === 'enter')) return [3 /*break*/, 3];
+	            // Sequential filling with Enter key
+	            console.log('Using sequential "enter" mode for form filling');
+	            return [4 /*yield*/, this.fillEnterMode(formElements)];
+	          case 2:
+	            filledCount = _d.sent();
+	            return [3 /*break*/, 4];
+	          case 3:
+	            // Default direct mode - fill all at once
+	            console.log('Using direct mode for form filling');
+	            filledCount = this.fillDirectMode(formElements);
+	            _d.label = 4;
+	          case 4:
+	            // Hide loading indicator
+	            this.hideLoadingIndicator();
+	            console.log("Filled ".concat(filledCount, " of ").concat(formElements.length, " form elements using ").concat(type, " mode"));
+	            if (filledCount > 0) {
+	              this.showMessage("Successfully filled ".concat(filledCount, " form fields!"), 'success');
 	              return [2 /*return*/, true];
 	            } else {
 	              this.showMessage('Could not fill any form fields', 'error');
 	              return [2 /*return*/, false];
 	            }
-	          case 2:
-	            error_1 = _c.sent();
+	          case 5:
+	            error_2 = _d.sent();
 	            this.hideLoadingIndicator();
-	            console.error('Error calling form API:', error_1);
-	            if (axios$1.isAxiosError(error_1)) {
-	              console.error('Response status:', (_a = error_1.response) === null || _a === void 0 ? void 0 : _a.status);
-	              console.error('Response data:', (_b = error_1.response) === null || _b === void 0 ? void 0 : _b.data);
+	            console.error('Error calling form API:', error_2);
+	            if (axios$1.isAxiosError(error_2)) {
+	              console.error('Response status:', (_b = error_2.response) === null || _b === void 0 ? void 0 : _b.status);
+	              console.error('Response data:', (_c = error_2.response) === null || _c === void 0 ? void 0 : _c.data);
 	            }
 	            this.showMessage('Error filling form', 'error');
 	            return [2 /*return*/, false];
-	          case 3:
+	          case 6:
 	            return [2 /*return*/];
 	        }
 	      });
@@ -31853,33 +31961,11 @@
 	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M20 17V7c0-2.168-3.663-4-8-4S4 4.832 4 7v10c0 2.168 3.663 4 8 4s8-1.832 8-4zM12 5c3.691 0 5.931 1.507 6 1.994C17.931 7.493 15.691 9 12 9S6.069 7.493 6 7.006C6.069 6.507 8.309 5 12 5zM6 9.607C7.479 10.454 9.637 11 12 11s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2V9.607zM6 17v-2.393C7.479 15.454 9.637 16 12 16s4.521-.546 6-1.393v2.387c-.069.499-2.309 2.006-6 2.006s-5.931-1.507-6-2z"},"child":[]}]})(props);
 	}function BiPlay (props) {
 	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M7 6v12l10-6z"},"child":[]}]})(props);
-	}function BiPlus (props) {
-	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"},"child":[]}]})(props);
 	}function BiX (props) {
 	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"m16.192 6.344-4.243 4.242-4.242-4.242-1.414 1.414L10.535 12l-4.242 4.242 1.414 1.414 4.242-4.242 4.243 4.242 1.414-1.414L13.364 12l4.242-4.242z"},"child":[]}]})(props);
 	}function BiSolidMagicWand (props) {
 	  return GenIcon({"tag":"svg","attr":{"viewBox":"0 0 24 24"},"child":[{"tag":"path","attr":{"d":"m11 4-.5-1-.5 1-1 .125.834.708L9.5 6l1-.666 1 .666-.334-1.167.834-.708zm8.334 10.666L18.5 13l-.834 1.666-1.666.209 1.389 1.181L16.834 18l1.666-1.111L20.166 18l-.555-1.944L21 14.875zM6.667 6.333 6 5l-.667 1.333L4 6.5l1.111.944L4.667 9 6 8.111 7.333 9l-.444-1.556L8 6.5zM3.414 17c0 .534.208 1.036.586 1.414L5.586 20c.378.378.88.586 1.414.586s1.036-.208 1.414-.586L20 8.414c.378-.378.586-.88.586-1.414S20.378 5.964 20 5.586L18.414 4c-.756-.756-2.072-.756-2.828 0L4 15.586c-.378.378-.586.88-.586 1.414zM17 5.414 18.586 7 15 10.586 13.414 9 17 5.414z"},"child":[]}]})(props);
 	}
-
-	var AddToAutoAct = function AddToAutoAct(_a) {
-	  var buttonPosition = _a.buttonPosition,
-	    sendSelectedDataToSidebar = _a.sendSelectedDataToSidebar;
-	  return jsxRuntimeExports.jsxs("button", {
-	    id: "btnAddToKnowledgebase",
-	    className: "absolute z-50 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 py-2 px-3 flex items-center gap-x-1 font-medium transition-all delay-75 duration-100 ease-linear",
-	    style: {
-	      left: buttonPosition.x,
-	      top: buttonPosition.y + 4
-	    },
-	    onClick: sendSelectedDataToSidebar,
-	    children: [jsxRuntimeExports.jsx(BiPlus, {
-	      size: 14,
-	      color: "white"
-	    }), jsxRuntimeExports.jsx("span", {
-	      children: "Add to AutoAct"
-	    })]
-	  });
-	};
 
 	var ALL_VALUES_SELECTED = 'ALL_VALUES_SELECTED';
 	var MODAL_ID = 'autoactModal';
@@ -32197,38 +32283,50 @@
 	  });
 	};
 
+	/**
+	 * This file contains constants for known form providers that should always
+	 * be detected as forms, regardless of the form detection score.
+	 */
+	/**
+	 * URL patterns that should be recognized as forms.
+	 * Each entry is a string that will be checked using startsWith against
+	 * the current URL and iframe URLs.
+	 */
+	var FORM_PROVIDER_URL_PATTERNS = ['https://form.typeform.com/'];
+	/**
+	 * DOM patterns that indicate a form is present.
+	 * Each entry is a RegExp pattern that will be tested against the HTML content.
+	 */
+	var FORM_PROVIDER_DOM_PATTERNS = [/AstrodomeSurvey/i, /retypedots/i];
+	/**
+	 * CSS selectors that, if found in the document, indicate a form is present.
+	 * Each entry is a CSS selector string.
+	 */
+	var FORM_PROVIDER_SELECTORS = ['[id*="retype"]', '[class*="retype"]'];
+
 	// Configuration settings for API URLs - you might want to move this to a config file
 	var API_BASE_URL = 'http://localhost:8000/api/v1/form';
-	var FORM_DETECTION_API_URL = 'http://localhost:8000/api/v1/form-detect';
-	var FALSE_POSITIVE_API_URL = 'http://localhost:8000/api/v1/form/false_positive_forms';
+	var FORM_DETECTION_API_URL = 'http://localhost:8000/api/v1/form/form-detect';
+	var FALSE_POSITIVE_API_URL = 'http://localhost:8000/api/v1/detect/false_positive_forms';
 	var ContentPage = function ContentPage() {
 	  var _a = reactExports.useState(false),
 	    isModalOpen = _a[0],
 	    setIsModalOpen = _a[1];
-	  var _b = reactExports.useState(false),
-	    showAddButton = _b[0],
-	    setShowAddButton = _b[1];
-	  var _c = reactExports.useState({
-	      x: 0,
-	      y: 0
-	    }),
-	    buttonPosition = _c[0],
-	    setButtonPosition = _c[1];
-	  var _d = reactExports.useState({
+	  var _b = reactExports.useState({
 	      title: '',
 	      description: ''
-	    }),
-	    pageData = _d[0],
-	    setPageData = _d[1];
-	  var _e = reactExports.useState([]),
-	    contexts = _e[0],
-	    setContexts = _e[1];
-	  var _f = reactExports.useState(false),
-	    hasForm = _f[0],
-	    setHasForm = _f[1];
-	  var _g = reactExports.useState(0);
-	    _g[0];
-	    var setFormScore = _g[1];
+	    });
+	    _b[0];
+	    _b[1];
+	  var _c = reactExports.useState([]),
+	    contexts = _c[0],
+	    setContexts = _c[1];
+	  var _d = reactExports.useState(false),
+	    hasForm = _d[0],
+	    setHasForm = _d[1];
+	  var _e = reactExports.useState(0);
+	    _e[0];
+	    var setFormScore = _e[1];
 	  // Initialize the form filler service when the component mounts
 	  reactExports.useEffect(function () {
 	    formFillerService.setApiUrl(API_BASE_URL);
@@ -32364,6 +32462,46 @@
 	      // Create a temporary DOM parser
 	      var parser = new DOMParser();
 	      var doc = parser.parseFromString(html, 'text/html');
+	      // Check for known form provider URL patterns
+	      var currentUrl = window.location.href;
+	      // Check current window URL against known patterns
+	      for (var _i = 0, FORM_PROVIDER_URL_PATTERNS_1 = FORM_PROVIDER_URL_PATTERNS; _i < FORM_PROVIDER_URL_PATTERNS_1.length; _i++) {
+	        var pattern = FORM_PROVIDER_URL_PATTERNS_1[_i];
+	        if (currentUrl.startsWith(pattern)) {
+	          console.log("Detected known form provider URL: ".concat(pattern));
+	          return 10; // High enough score to show toolbar
+	        }
+	      }
+	      // Check iframe URLs
+	      var iframes = Array.from(document.querySelectorAll('iframe'));
+	      for (var _a = 0, iframes_1 = iframes; _a < iframes_1.length; _a++) {
+	        var iframe = iframes_1[_a];
+	        if (iframe.src) {
+	          for (var _b = 0, FORM_PROVIDER_URL_PATTERNS_2 = FORM_PROVIDER_URL_PATTERNS; _b < FORM_PROVIDER_URL_PATTERNS_2.length; _b++) {
+	            var pattern = FORM_PROVIDER_URL_PATTERNS_2[_b];
+	            if (iframe.src.startsWith(pattern)) {
+	              console.log("Detected known form provider URL in iframe: ".concat(pattern));
+	              return 10; // High enough score to show toolbar
+	            }
+	          }
+	        }
+	      }
+	      // Check for known DOM patterns in HTML content
+	      for (var _c = 0, FORM_PROVIDER_DOM_PATTERNS_1 = FORM_PROVIDER_DOM_PATTERNS; _c < FORM_PROVIDER_DOM_PATTERNS_1.length; _c++) {
+	        var pattern = FORM_PROVIDER_DOM_PATTERNS_1[_c];
+	        if (pattern.test(html)) {
+	          console.log("Detected known form provider DOM pattern: ".concat(pattern));
+	          return 10; // High enough score to show toolbar
+	        }
+	      }
+	      // Check for known CSS selectors
+	      for (var _d = 0, FORM_PROVIDER_SELECTORS_1 = FORM_PROVIDER_SELECTORS; _d < FORM_PROVIDER_SELECTORS_1.length; _d++) {
+	        var selector = FORM_PROVIDER_SELECTORS_1[_d];
+	        if (doc.querySelectorAll(selector).length > 0) {
+	          console.log("Detected known form provider selector: ".concat(selector));
+	          return 10; // High enough score to show toolbar
+	        }
+	      }
 	      // Helper function to check if an element is likely visible
 	      var isLikelyVisible = function isLikelyVisible(element) {
 	        var _a, _b, _c, _d, _e, _f;
@@ -32437,7 +32575,7 @@
 	          case 3:
 	            error_2 = _a.sent();
 	            console.error('Error checking false positive:', error_2);
-	            return [2 /*return*/, false];
+	            return [2 /*return*/, true];
 	          // If API fails, assume it's not a false positive
 	          case 4:
 	            return [2 /*return*/];
@@ -32529,36 +32667,7 @@
 	      });
 	    });
 	  };
-	  var handleMouseUp = function handleMouseUp() {
-	    var selection = window.getSelection(),
-	      selectedText = (selection === null || selection === void 0 ? void 0 : selection.toString().trim()) || '';
-	    if ((selectedText === null || selectedText === void 0 ? void 0 : selectedText.length) !== 0 && (selection === null || selection === void 0 ? void 0 : selection.rangeCount)) {
-	      setShowAddButton(false);
-	      setPageData({
-	        title: document.title,
-	        description: selectedText
-	      });
-	      var range = selection.getRangeAt(0),
-	        rect = range.getBoundingClientRect();
-	      setButtonPosition({
-	        x: rect.left + window.scrollX,
-	        y: rect.bottom + window.scrollY
-	      });
-	      setShowAddButton(true);
-	    }
-	  };
-	  var handleMouseDown = function handleMouseDown(event) {
-	    var element = event.composedPath()[0];
-	    if (element.id === 'btnAddToKnowledgebase' || element.closest('#btnAddToKnowledgebase')) return;
-	    setShowAddButton(false);
-	  };
-	  var handleClick = function handleClick() {
-	    setTimeout(function () {
-	      var _a;
-	      var selection = (_a = window.getSelection()) === null || _a === void 0 ? void 0 : _a.toString().trim();
-	      if (!selection) setShowAddButton(false);
-	    }, 0);
-	  };
+	  // Context menu functionality is now handled in the background script
 	  var fetchContexts = function fetchContexts() {
 	    chrome.runtime.sendMessage({
 	      action: 'getContexts'
@@ -32574,20 +32683,13 @@
 	  reactExports.useEffect(function () {
 	    fetchContexts();
 	    chrome.runtime.onMessage.addListener(handleRefetchContexts);
-	    document.addEventListener('mouseup', handleMouseUp);
-	    document.addEventListener('mousedown', handleMouseDown);
-	    document.addEventListener('click', handleClick);
 	    return function () {
 	      chrome.runtime.onMessage.removeListener(handleRefetchContexts);
-	      document.removeEventListener('mouseup', handleMouseUp);
-	      document.removeEventListener('mousedown', handleMouseDown);
-	      document.removeEventListener('click', handleClick);
 	    };
 	  }, []);
 	  var removeSelection = function removeSelection() {
 	    var _a;
 	    (_a = document.getSelection()) === null || _a === void 0 ? void 0 : _a.removeAllRanges();
-	    setShowAddButton(false);
 	  };
 	  var openSidebar = function openSidebar(contentType, notifySidePanel) {
 	    if (notifySidePanel === void 0) {
@@ -32598,14 +32700,6 @@
 	      contentType: contentType,
 	      notifySidePanel: notifySidePanel
 	    });
-	  };
-	  var sendSelectedDataToSidebar = function sendSelectedDataToSidebar() {
-	    removeSelection();
-	    chrome.runtime.sendMessage({
-	      action: 'scrappedPageData',
-	      pageData: pageData
-	    });
-	    openSidebar('addNewContext', true);
 	  };
 	  var handleMagicWandClick = function handleMagicWandClick() {
 	    return __awaiter(void 0, void 0, void 0, function () {
@@ -32629,9 +32723,6 @@
 	        return setIsModalOpen(false);
 	      },
 	      contexts: contexts
-	    }), showAddButton && jsxRuntimeExports.jsx(AddToAutoAct, {
-	      buttonPosition: buttonPosition,
-	      sendSelectedDataToSidebar: sendSelectedDataToSidebar
 	    }), hasForm && jsxRuntimeExports.jsx(Toolbar, {
 	      contexts: contexts,
 	      openSidebar: openSidebar,
